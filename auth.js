@@ -34,6 +34,7 @@
   auth.onAuthStateChanged(user => {
     window.__uid = user ? user.uid : null;
     if (user && window.__onGuardLogin) { try { window.__onGuardLogin(); } catch (e) {} }
+    if (user && window.__onLiveLogin) { try { window.__onLiveLogin(); } catch (e) {} }
     if (user) {
       lockEl.style.display = 'none';
       const chip = document.getElementById('userChip');

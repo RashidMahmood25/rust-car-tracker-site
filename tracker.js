@@ -122,6 +122,7 @@ function handlePoint(lat, lng, speedMs, accuracyM) {
   const kmhNow = parseFloat($('speed').textContent) || 0;
   checkTools(point, kmhNow);
   guardCheck(point);
+  livePush(point, kmh);
 }
 
 function setButtons(tracking) {
@@ -336,6 +337,7 @@ function checkTools(point, kmh) {
   if (limEl) {
     const lim = parseInt(limEl.value, 10);
     const over = kmh > lim;
+    $('speed').style.color = over ? '#F87171' : '';
     $('speed').parentElement.style.color = over ? '#F87171' : '';
     if (over && Date.now() - lastBeepAt > 8000) {
       lastBeepAt = Date.now(); beep(2);
@@ -387,6 +389,40 @@ function guardPush(extra) {
   if (extra) Object.assign(data, extra);
   r.set(data).catch(() => {});
 }
+/* ---------- Live Link: this phone sends, any signed-in device watches ---------- */
+let lastLivePush = 0, liveMarker = null;
+function liveRef() {
+  try {
+    if (window.firebase && firebase.apps && firebase.apps.length && window.__uid && firebase.database) {
+      return firebase.database().ref('live/' + window.__uid);
+    }
+  } catch (e) {}
+  return null;
+}
+function livePush(point, kmh) {
+  const now = Date.now();
+  if (now - lastLivePush < 10000) return;
+  const r = liveRef(); if (!r) return;
+  lastLivePush = now;
+  r.set({ lat: point[0], lng: point[1], kmh: Math.round(kmh || 0), ts: now, src: demoTimer ? 'web-demo' : 'web-live' }).catch(() => {});
+}
+function liveSetInfo(t) { const el = $('liveInfo'); if (el) el.textContent = t; }
+window.__onLiveLogin = function () {
+  const r = liveRef(); if (!r) { liveSetInfo('Live Link needs the database — coming online soon.'); return; }
+  r.on('value', snap => {
+    const v = snap.val();
+    if (!v || !v.lat) { liveSetInfo('No linked phone is sending yet. Start tracking on the phone in the car (the app, or this website) and it will appear here.'); return; }
+    const ageS = Math.max(0, Math.round((Date.now() - (v.ts || 0)) / 1000));
+    if (ageS < 120) {
+      if (!liveMarker) liveMarker = L.marker([v.lat, v.lng], { icon: L.divIcon({ className: '', html: '<div class="car-icon">🔵</div>', iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(map);
+      else liveMarker.setLatLng([v.lat, v.lng]);
+      liveSetInfo('Linked phone is LIVE · updated ' + ageS + 's ago · speed ' + (v.kmh || 0) + ' km/h' + (v.src === 'app' ? ' · from the app' : ''));
+    } else {
+      liveSetInfo('Linked phone last seen ' + Math.round(ageS / 60) + ' min ago.');
+    }
+  });
+};
+
 function guardSetInfo(t) { const el = $('guardInfo'); if (el) el.textContent = t; }
 
 function armGuard() {
