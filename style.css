@@ -6,7 +6,7 @@
   }
   :root[data-theme="light"]{
     --bg:#F0F4E8; --bg2:#E6EDD8; --ink:#141C0D; --muted:#5A6B57; --glass:rgba(20,28,13,.055);
-    --line:rgba(20,28,13,.16); --strong:#101607; --lime:#1D4ED8; --lime2:#1E3A8A; --mint:#2563EB; --hero-sub:#26331F; --chip-bg:rgba(255,255,255,.55); --chip-ink:#22301A; --panel:linear-gradient(180deg,#FFFFFF,#F4F8EC);
+    --line:rgba(20,28,13,.16); --strong:#101607; --lime:#7C3AED; --lime2:#5B21B6; --mint:#9333EA; --hero-sub:#26331F; --chip-bg:rgba(255,255,255,.55); --chip-ink:#22301A; --panel:linear-gradient(180deg,#FFFFFF,#F4F8EC);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -105,6 +105,17 @@
   .user-chip button{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
 
   :root[data-theme="light"] .hero .shade{background:linear-gradient(180deg,rgba(255,255,255,.48) 0%,rgba(255,255,255,.18) 42%,rgba(240,244,232,1) 100%)}
-  :root[data-theme="light"] h1.display .grad{background:linear-gradient(92deg,#1D4ED8,#2563EB 55%,#0284C7);-webkit-background-clip:text;background-clip:text;color:transparent}
+  :root[data-theme="light"] h1.display .grad{background:linear-gradient(92deg,#7C3AED,#9333EA 55%,#D946EF);-webkit-background-clip:text;background-clip:text;color:transparent}
   :root[data-theme="light"] .btn-glass{background:rgba(255,255,255,.55)}
   :root[data-theme="light"] .btn-lime{color:#FFFFFF}
+
+  /* Light mode: lime ki dhhal (tints) bhi purple */
+  :root[data-theme="light"] .hero .glow{background:radial-gradient(circle,rgba(124,58,237,.18),transparent 65%)}
+  :root[data-theme="light"] .brand .dot{box-shadow:0 0 24px rgba(124,58,237,.4)}
+  :root[data-theme="light"] .kicker{background:rgba(124,58,237,.10);border-color:rgba(124,58,237,.4)}
+  :root[data-theme="light"] .btn-lime{box-shadow:0 10px 34px rgba(124,58,237,.32)}
+  :root[data-theme="light"] #statusPill.live{border-color:rgba(124,58,237,.55)}
+  :root[data-theme="light"] .feat:hover{border-color:rgba(124,58,237,.5)}
+  :root[data-theme="light"] .rw{background:linear-gradient(120deg,rgba(124,58,237,.10),rgba(255,255,255,.35) 55%);border-color:rgba(124,58,237,.35)}
+  :root[data-theme="light"] #themeToggle:hover{border-color:rgba(124,58,237,.55)}
+  :root[data-theme="light"] .lock-card{border-color:rgba(124,58,237,.45)}
