@@ -1,4 +1,4 @@
-/* Rust Car Tracker — Dark (night) / Light (day) mode: video, map aur pura theme badalta hai; pasand localStorage mein mehfooz rehti hai */
+/* Rust Car Tracker — Dark (night) / Light (day) mode: switches the hero video, the map and the whole theme; the choice is remembered in localStorage. */
 (function(){
     const root = document.documentElement, btn = document.getElementById('themeToggle');
     const vN = document.getElementById('vidNight'), vD = document.getElementById('vidDay');

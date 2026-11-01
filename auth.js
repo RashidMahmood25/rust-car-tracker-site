@@ -1,4 +1,4 @@
-/* Rust Car Tracker — Signup gate (Firebase Auth: Google + Facebook). Location sirf signed-in user ko dikhti hai. */
+/* Rust Car Tracker — Signup gate (Firebase Auth: Google + Facebook). The live location is visible only to signed-in users. */
 /* ---------- Sign-up gate (Firebase Auth) ----------
      Config is filled in once the Firebase project exists.
      Until then the tracker stays locked with a notice. */
@@ -33,13 +33,13 @@
       errEl.style.display = 'none';
       auth.signInWithPopup(provider).catch(e => {
         if (e.code === 'auth/popup-closed-by-user') return;
-        if (e.code === 'auth/operation-not-allowed') authError('Ye wala sign-up abhi on nahi hai — Google wala try karein.');
-        else authError('Sign-up mein masla aya (' + e.code + '). Dobara try karein.');
+        if (e.code === 'auth/operation-not-allowed') authError('This sign-in option is not available yet — please try Google sign-in.');
+        else authError('Sign-in failed (' + e.code + '). Please try again.');
       });
     }
     document.getElementById('googleBtn').addEventListener('click', () => popup(new firebase.auth.GoogleAuthProvider()));
     document.getElementById('fbBtn').addEventListener('click', () => popup(new firebase.auth.FacebookAuthProvider()));
     document.getElementById('signOutBtn').addEventListener('click', () => auth.signOut());
   } else {
-    authError('Sign-up system jald live ho raha hai — thora intezaar karein.');
+    authError('Sign-up is opening very soon — please check back shortly.');
   }
