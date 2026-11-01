@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rust Car Tracker — Track Your Car With Your Phone</title>
+<meta name="description" content="A web app that turns any smartphone into a live GPS car tracker. No extra device, no sign-up — just open the page and start tracking.">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#1769AA; --cyan:#20A4D8; --sky:#EAF6FC;
+    --carbon:#111827; --slate:#64748B; --card:#ffffff; --ok:#16a34a; --warn:#dc2626;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Segoe UI', system-ui, -apple-system, Arial, sans-serif; background:var(--sky); color:var(--carbon);}
+  header{background:var(--navy); color:#fff; padding:18px 16px;}
+  header .wrap{max-width:1080px; margin:0 auto; display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  header h1{font-size:22px; line-height:1.25;}
+  header p{color:#BFD9EA; font-size:14px; margin-top:2px;}
+  .logo{font-size:34px;}
+  #statusPill{margin-left:auto; background:#33475e; color:#fff; padding:6px 14px; border-radius:999px; font-size:13px; font-weight:600;}
+  #statusPill.live{background:var(--ok);}
+  #statusPill.demo{background:var(--blue);}
+  #statusPill.error{background:var(--warn);}
+  main{max-width:1080px; margin:0 auto; padding:16px;}
+  #map{height:420px; border-radius:14px; border:2px solid var(--navy); box-shadow:0 4px 18px rgba(11,31,58,.18); background:#dbe9f2;}
+  .controls{display:flex; gap:10px; flex-wrap:wrap; margin:16px 0;}
+  button{border:0; border-radius:10px; padding:12px 18px; font-size:15px; font-weight:700; cursor:pointer; color:#fff; background:var(--blue);}
+  button:hover{filter:brightness(1.1);}
+  button:disabled{opacity:.45; cursor:not-allowed;}
+  #startBtn{background:var(--ok);}
+  #stopBtn{background:var(--warn);}
+  #clearBtn{background:var(--slate);}
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:6px 0 18px;}
+  .stat{background:var(--card); border-radius:12px; padding:14px; box-shadow:0 2px 8px rgba(11,31,58,.08);}
+  .stat .label{font-size:12px; color:var(--slate); text-transform:uppercase; letter-spacing:.06em;}
+  .stat .value{font-size:22px; font-weight:800; color:var(--navy); margin-top:4px;}
+  .stat .unit{font-size:13px; color:var(--slate); font-weight:600;}
+  section.card{background:var(--card); border-radius:12px; padding:18px; margin-bottom:16px; box-shadow:0 2px 8px rgba(11,31,58,.08);}
+  section.card h2{color:var(--navy); font-size:18px; margin-bottom:10px;}
+  section.card p, section.card li{font-size:15px; line-height:1.55; color:#26303c;}
+  section.card ol{margin-left:20px;}
+  #msg{display:none; background:#FFF4E5; border:1px solid #F0B35E; color:#7A4A00; padding:12px 14px; border-radius:10px; margin-bottom:14px; font-size:14px; line-height:1.5;}
+  .car-icon{font-size:30px; text-shadow:0 1px 4px rgba(0,0,0,.4);}
+  footer{text-align:center; color:var(--slate); font-size:13px; padding:8px 16px 28px;}
+  footer a{color:var(--blue); font-weight:700; text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="logo">🚗📱</div>
+    <div>
+      <h1>Rust Car Tracker — Track Your Car With Your Phone</h1>
+      <p>No extra GPS device. Your phone <em>is</em> the tracker — works in <strong>every city of the world</strong>, not just Pakistan.</p>
+      <p style="font-size:.85rem;opacity:.85;margin-top:6px">A Rust Innovations project · From the makers of <strong>Rust Wheel</strong></p>
+    </div>
+    <div id="statusPill">● Not tracking</div>
+  </div>
+</header>
+
+<main>
+  <div id="msg"></div>
+
+  <div id="map"></div>
+
+  <div class="controls">
+    <button id="startBtn">▶ Start Live Tracking</button>
+    <button id="demoBtn">🧪 Demo Drive (no GPS needed)</button>
+    <button id="stopBtn" disabled>■ Stop</button>
+    <button id="clearBtn">↺ Clear Route</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Speed</div><div class="value"><span id="speed">0</span> <span class="unit">km/h</span></div></div>
+    <div class="stat"><div class="label">Distance</div><div class="value"><span id="distance">0.00</span> <span class="unit">km</span></div></div>
+    <div class="stat"><div class="label">Trip Time</div><div class="value" id="tripTime">00:00</div></div>
+    <div class="stat"><div class="label">Latitude</div><div class="value" style="font-size:17px" id="lat">—</div></div>
+    <div class="stat"><div class="label">Longitude</div><div class="value" style="font-size:17px" id="lng">—</div></div>
+    <div class="stat"><div class="label">GPS Accuracy</div><div class="value"><span id="accuracy">—</span> <span class="unit">m</span></div></div>
+  </div>
+
+
+  <section class="card" style="border:2px solid var(--blue)">
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <img src="data:image/png;base64,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" alt="Rust Wheel logo" style="width:84px;height:84px;border-radius:16px">
+      <div style="flex:1;min-width:220px">
+        <h2 style="margin-top:0">Rust Wheel — Buy &amp; Sell Cars &amp; Bikes in Pakistan</h2>
+        <p>Rust Car Tracker is a <strong>Rust Innovations</strong> project. Our main app, <strong>Rust Wheel</strong>, is Pakistan's marketplace for cars and bikes — <strong>0% commission</strong>, <strong>500+ cars and bikes listed</strong>, and you deal directly with the owner. No middleman, no extra charges.</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+      <a href="https://play.google.com/store/apps/details?id=com.rustinnovations.rustwheel&amp;hl=en" target="_blank" rel="noopener" style="background:var(--blue);color:#fff;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:12px">⬇️ Download the Rust Wheel App</a>
+      <a href="https://www.facebook.com/rustwheel" target="_blank" rel="noopener" style="background:var(--sky);color:var(--navy);text-decoration:none;font-weight:700;padding:12px 18px;border-radius:12px">Rust Wheel on Facebook</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>How it works</h2>
+    <ol>
+      <li><strong>Put a phone in the car</strong> — any smartphone, plugged into a charger or power bank, with mobile data on.</li>
+      <li><strong>Open this page on that phone</strong> and press <strong>Start Live Tracking</strong>. Allow location permission — the phone now works as a live GPS tracker.</li>
+      <li><strong>Watch it move on the map</strong> — position, speed and the full route update in real time as the car drives.</li>
+    </ol>
+    <p style="margin-top:10px">No account, no sign-up, no server: your location is processed <strong>on your own device</strong> in this version. The map covers the <strong>whole world</strong> and phone GPS works in every country — open it in Karachi, Dubai, London or New York and tracking starts in your own city. Try the <strong>Demo Drive</strong> button to see a simulated trip (a Lahore example route) if you are on a desktop or GPS is unavailable.</p>
+  </section>
+
+  <section class="card">
+    <h2>Good to know</h2>
+    <p>• Live tracking needs the browser tab to stay open and location permission to be allowed. Geolocation works on HTTPS pages (and on <em>localhost</em>).<br>
+    • Speed comes from the phone's GPS; when the GPS chip does not report it, the app calculates it from movement between points.<br>
+    • Roadmap: multi-phone live sharing (watch your car from a second phone), trip history, and geofence alerts are planned as the next versions — see the README in the GitHub repository.</p>
+  </section>
+</main>
+
+<footer>
+  A Rust Innovations project by <a href="https://github.com/RashidMahmood25">Rashid Mahmood</a> · Map © OpenStreetMap contributors · Built with Leaflet
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+"use strict";
+/* ============================================================
+   Rust Car Tracker — phone-as-GPS-tracker web app
+   Live mode : uses the phone's own GPS (Geolocation API)
+   Demo mode : simulates a drive so anyone can test instantly
+   ============================================================ */
+
+/* The map is WORLDWIDE (OpenStreetMap covers the whole planet) and the
+   phone's GPS satellites are global — this app works in any city of any
+   country. It opens on a world view and flies to YOUR city the moment
+   live tracking starts. */
+const WORLD_VIEW = [20, 10];
+
+const map = L.map('map').setView(WORLD_VIEW, 2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+const carIcon = L.divIcon({ className: '', html: '<div class="car-icon">🚗</div>', iconSize: [32, 32], iconAnchor: [16, 16] });
+let marker = null;
+let trail = L.polyline([], { color: '#1769AA', weight: 5, opacity: 0.85 }).addTo(map);
+
+let watchId = null;        // geolocation watch handle
+let demoTimer = null;      // demo animation handle
+let clockTimer = null;     // trip clock
+let tripStart = null;      // Date when the current trip started
+let totalKm = 0;           // accumulated distance
+let lastPoint = null;      // last [lat, lng]
+let lastPointTime = null;  // timestamp of last point
+
+const $ = id => document.getElementById(id);
+const pill = $('statusPill');
+
+function showMsg(text) {
+  const m = $('msg');
+  if (!text) { m.style.display = 'none'; m.textContent = ''; return; }
+  m.textContent = text; m.style.display = 'block';
+}
+
+function setStatus(text, cls) {
+  pill.textContent = '● ' + text;
+  pill.className = cls || '';
+  pill.id = 'statusPill';
+}
+
+/* Great-circle distance between two GPS points, in kilometres */
+function haversineKm(a, b) {
+  const R = 6371, toRad = d => d * Math.PI / 180;
+  const dLat = toRad(b[0] - a[0]), dLng = toRad(b[1] - a[1]);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+function startClock() {
+  tripStart = Date.now();
+  clockTimer = setInterval(() => {
+    const s = Math.floor((Date.now() - tripStart) / 1000);
+    $('tripTime').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  }, 1000);
+}
+
+function stopClock() { if (clockTimer) { clearInterval(clockTimer); clockTimer = null; } }
+
+/* Every new GPS point flows through here — live or demo */
+function handlePoint(lat, lng, speedMs, accuracyM) {
+  const point = [lat, lng];
+  const now = Date.now();
+
+  if (lastPoint) {
+    const d = haversineKm(lastPoint, point);
+    /* Ignore GPS jitter smaller than ~3 metres */
+    if (d > 0.003) {
+      totalKm += d;
+      trail.addLatLng(point);
+      if ((speedMs === null || speedMs === undefined) && lastPointTime) {
+        const hours = (now - lastPointTime) / 3600000;
+        if (hours > 0) speedMs = (d / hours) / 3.6; /* km/h -> m/s */
+      }
+      lastPoint = point; lastPointTime = now;
+    }
+  } else {
+    lastPoint = point; lastPointTime = now;
+    trail.addLatLng(point);
+    map.setView(point, 15);
+  }
+
+  if (!marker) { marker = L.marker(point, { icon: carIcon }).addTo(map); }
+  else { marker.setLatLng(point); }
+  map.panTo(point);
+
+  $('speed').textContent = speedMs ? Math.round(speedMs * 3.6) : 0;
+  $('distance').textContent = totalKm.toFixed(2);
+  $('lat').textContent = lat.toFixed(6);
+  $('lng').textContent = lng.toFixed(6);
+  $('accuracy').textContent = accuracyM ? Math.round(accuracyM) : '—';
+}
+
+function setButtons(tracking) {
+  $('startBtn').disabled = tracking;
+  $('demoBtn').disabled = tracking;
+  $('stopBtn').disabled = !tracking;
+}
+
+/* ---------------- Live GPS mode ---------------- */
+function startLive() {
+  showMsg('');
+  if (!('geolocation' in navigator)) {
+    showMsg('This browser does not support GPS geolocation. Try the Demo Drive button instead.');
+    setStatus('GPS not supported', 'error');
+    return;
+  }
+  setStatus('Waiting for GPS…', 'demo');
+  watchId = navigator.geolocation.watchPosition(
+    pos => {
+      setStatus('Live tracking', 'live');
+      handlePoint(pos.coords.latitude, pos.coords.longitude, pos.coords.speed, pos.coords.accuracy);
+    },
+    err => {
+      stopAll();
+      setStatus('GPS error', 'error');
+      showMsg('Could not get your location (' + err.message + '). Allow location permission for this site, keep GPS/location services ON, and try again — or use Demo Drive.');
+    },
+    { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 }
+  );
+  startClock();
+  setButtons(true);
+}
+
+/* ---------------- Demo mode ----------------
+   A short simulated route in Gulberg / Main Boulevard, Lahore,
+   so the app can be tested anywhere with no GPS at all.     */
+const DEMO_ROUTE = [
+  [31.5102, 74.3441], [31.5120, 74.3470], [31.5141, 74.3498], [31.5163, 74.3522],
+  [31.5189, 74.3544], [31.5216, 74.3563], [31.5244, 74.3579], [31.5273, 74.3591],
+  [31.5301, 74.3598], [31.5330, 74.3601], [31.5355, 74.3595], [31.5378, 74.3582]
+];
+
+function interpolate(route, stepsPerLeg) {
+  const pts = [];
+  for (let i = 0; i < route.length - 1; i++) {
+    for (let s = 0; s < stepsPerLeg; s++) {
+      pts.push([
+        route[i][0] + (route[i + 1][0] - route[i][0]) * (s / stepsPerLeg),
+        route[i][1] + (route[i + 1][1] - route[i][1]) * (s / stepsPerLeg)
+      ]);
+    }
+  }
+  pts.push(route[route.length - 1]);
+  return pts;
+}
+
+function startDemo() {
+  showMsg('');
+  setStatus('Demo drive', 'demo');
+  const pts = interpolate(DEMO_ROUTE, 6);
+  let i = 0;
+  startClock();
+  setButtons(true);
+  demoTimer = setInterval(() => {
+    if (i >= pts.length) { stopAll(); setStatus('Demo finished', ''); return; }
+    /* Simulated city speed: gentle variation between 24 and 42 km/h */
+    const fakeSpeedMs = (24 + 18 * Math.abs(Math.sin(i / 5))) / 3.6;
+    handlePoint(pts[i][0], pts[i][1], fakeSpeedMs, 8);
+    i++;
+  }, 700);
+}
+
+/* ---------------- Stop / clear ---------------- */
+function stopAll() {
+  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
+  stopClock();
+  setButtons(false);
+  if (pill.textContent.includes('tracking') || pill.textContent.includes('Demo')) setStatus('Stopped', '');
+}
+
+function clearRoute() {
+  stopAll();
+  trail.setLatLngs([]);
+  if (marker) { map.removeLayer(marker); marker = null; }
+  totalKm = 0; lastPoint = null; lastPointTime = null;
+  $('speed').textContent = '0'; $('distance').textContent = '0.00';
+  $('lat').textContent = '—'; $('lng').textContent = '—'; $('accuracy').textContent = '—';
+  $('tripTime').textContent = '00:00';
+  setStatus('Not tracking', '');
+  map.setView(WORLD_VIEW, 2);
+}
+
+/* If the visitor has ALREADY granted location permission to this site,
+   open the map over their own city (anywhere in the world) instead of the
+   world view. No prompt is triggered from here. */
+if (navigator.permissions && navigator.geolocation) {
+  navigator.permissions.query({ name: 'geolocation' }).then(result => {
+    if (result.state === 'granted') {
+      navigator.geolocation.getCurrentPosition(
+        pos => map.setView([pos.coords.latitude, pos.coords.longitude], 13),
+        () => {},
+        { timeout: 8000 }
+      );
+    }
+  }).catch(() => {});
+}
+
+$('startBtn').addEventListener('click', startLive);
+$('demoBtn').addEventListener('click', startDemo);
+$('stopBtn').addEventListener('click', stopAll);
+$('clearBtn').addEventListener('click', clearRoute);
+</script>
+</body>
+</html>
