@@ -1,9 +1,17 @@
 # 🚗📱 Rust Car Tracker — Live Website
 
-This repository hosts the **public live website** of **Rust Car Tracker** (a Rust Innovations project): a web app that turns any smartphone into a live GPS car tracker — worldwide maps, live speed/distance dashboard, no sign-up.
+Public live website of **Rust Car Tracker** (a Rust Innovations project): a web app that turns any smartphone into a live GPS car tracker — worldwide maps, live speed/distance dashboard, dark (night) / light (day) themes, and sign-up with Google/Facebook to unlock the live location.
 
 **Live site:** https://rashidmahmood25.github.io/rust-car-tracker-site/
 
-Also on this page: **Rust Wheel** — Pakistan's car & bike marketplace (0% commission, 500+ cars and bikes listed). Download the app: https://play.google.com/store/apps/details?id=com.rustinnovations.rustwheel&hl=en
+## Files — har cheez apni jagah, apne naam ke saath
 
-> The main project repository stays private; this repo exists only to serve the public website (GitHub Pages cannot serve a free site from a private repo).
+| File | Kaam |
+|---|---|
+| `index.html` | Page ka dhacha (structure) — hero, tracker, features, Rust Wheel section (logo isi mein embedded hai) |
+| `style.css` | Pura design — dark/light themes, hero, cards, buttons |
+| `tracker.js` | GPS tracking logic — live tracking, demo drive, satellite/street map |
+| `theme.js` | Dark (raat) / Light (din) mode switch — video + map + theme badalta hai |
+| `auth.js` | Signup gate (Firebase) — Google/Facebook login ke baghair location band |
+
+> The main project repository (`rust-car-tracker`) stays **private**; this repo exists only to serve the public website (GitHub Pages cannot serve a free site from a private repo). Wahan bhi yehi organized files mehfooz hain.

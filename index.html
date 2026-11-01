@@ -6,105 +6,17 @@
 <title>Rust Car Tracker — Your Car. Always On Your Map.</title>
 <meta name="description" content="Rust Car Tracker turns any smartphone into a live GPS car tracker. Worldwide maps, live speed and route — no extra device, no sign-up.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<style>
-  :root{
-    --bg:#060807; --bg2:#0B0E0A; --lime:#A3E635; --lime2:#65A30D; --mint:#BEF264;
-    --ink:#F4F7F0; --muted:#9AA79B; --glass:rgba(255,255,255,.055); --line:rgba(255,255,255,.11);
-    --red:#F87171; --strong:#FFFFFF; --panel:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
-  }
-  :root[data-theme="light"]{
-    --bg:#F0F4E8; --bg2:#E6EDD8; --ink:#141C0D; --muted:#5A6B57; --glass:rgba(20,28,13,.055);
-    --line:rgba(20,28,13,.16); --strong:#101607; --panel:linear-gradient(180deg,#FFFFFF,#F4F8EC);
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
-  a{color:var(--lime)}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 18px}
-
-  /* ---------- HERO with video ---------- */
-  .hero{position:relative;min-height:94vh;display:flex;flex-direction:column;overflow:hidden;background:#000}
-  .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.62}
-  .hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,4,.66) 0%,rgba(4,6,4,.38) 42%,rgba(6,8,7,1) 100%)}
-  .hero .glow{position:absolute;width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,rgba(163,230,53,.20),transparent 65%);top:-180px;right:-140px;pointer-events:none}
-  nav{position:relative;z-index:3;display:flex;align-items:center;gap:14px;padding:18px 0}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.14em;font-size:1.02rem}
-  .brand .dot{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--lime),var(--lime2));display:grid;place-items:center;font-size:20px;box-shadow:0 0 24px rgba(163,230,53,.45)}
-  .brand em{font-style:normal;color:var(--lime)}
-  nav .links{margin-left:auto;display:flex;gap:20px;font-size:.92rem}
-  nav .links a{color:var(--ink);text-decoration:none;opacity:.85}
-  nav .links a:hover{opacity:1;color:var(--lime)}
-  @media(max-width:640px){nav .links{display:none}}
-  .hero-mid{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:34px 0 60px}
-  .kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(163,230,53,.12);border:1px solid rgba(163,230,53,.4);color:var(--mint);padding:6px 14px;border-radius:999px;font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
-  .kicker i{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);animation:pulse 1.6s infinite}
-  @keyframes pulse{50%{opacity:.35}}
-  h1.display{font-size:clamp(2.4rem,6.4vw,4.4rem);line-height:1.04;font-weight:900;letter-spacing:-.01em;margin:20px 0 14px;max-width:13ch}
-  h1.display .grad{background:linear-gradient(92deg,var(--lime),#D9F99D 55%,var(--lime));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .hero p.sub{font-size:clamp(1rem,2vw,1.2rem);color:#D6DDD2;max-width:56ch}
-  .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
-  .btn{border:none;cursor:pointer;font:inherit;font-weight:800;border-radius:999px;padding:14px 26px;font-size:1rem;text-decoration:none;display:inline-flex;align-items:center;gap:9px;transition:transform .15s, box-shadow .15s}
-  .btn:hover{transform:translateY(-2px)}
-  .btn-lime{background:linear-gradient(135deg,var(--lime),var(--lime2));color:#0A0F05;box-shadow:0 10px 34px rgba(163,230,53,.35)}
-  .btn-glass{background:rgba(255,255,255,.08);color:var(--ink);border:1px solid var(--line);backdrop-filter:blur(8px)}
-  .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:34px}
-  .chip{background:rgba(10,14,9,.55);border:1px solid var(--line);backdrop-filter:blur(8px);padding:9px 16px;border-radius:999px;font-size:.86rem;color:#DDE6D8}
-  .chip b{color:var(--lime)}
-
-  /* ---------- Sections ---------- */
-  section.block{padding:56px 0 8px}
-  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;flex-wrap:wrap}
-  .sec-head h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:900}
-  .sec-head .tag{color:var(--lime);font-weight:800;letter-spacing:.16em;font-size:.75rem;text-transform:uppercase}
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:18px;backdrop-filter:blur(10px);box-shadow:0 24px 60px rgba(0,0,0,.45)}
-  #map{height:430px;border-radius:18px;border:1px solid var(--line);z-index:0;background:#0A0C0A}
-  .car-icon{font-size:30px;text-align:center;line-height:1;filter:drop-shadow(0 4px 10px rgba(0,0,0,.7))}
-  #statusPill{margin-left:auto;font-weight:700;font-size:.95rem;background:rgba(255,255,255,.06);border:1px solid var(--line);padding:8px 16px;border-radius:999px;color:#C6CFC2}
-  #statusPill.live{color:var(--lime);border-color:rgba(163,230,53,.55)}
-  #statusPill.demo{color:#FDE047;border-color:rgba(250,204,21,.5)}
-  #statusPill.error{color:#FCA5A5;border-color:rgba(248,113,113,.5)}
-  .controls{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px}
-  .cbtn{border-radius:14px;padding:13px 20px;font-size:.98rem}
-  .cbtn-stop{background:rgba(248,113,113,.14);color:#FCA5A5;border:1px solid rgba(248,113,113,.45)}
-  .cbtn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}
-  .stat{background:var(--glass);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
-  .stat .label{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
-  .stat .value{font-size:1.55rem;font-weight:900;color:var(--strong);margin-top:2px}
-  .stat .value span{font-size:.85rem;color:var(--lime);font-weight:700}
-  #msg{display:none;margin-top:14px;border-radius:14px;padding:12px 16px;font-size:.94rem;background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.4);color:#FEF9C3}
-
-  .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-  .feat{background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:22px;transition:transform .15s,border-color .15s}
-  .feat:hover{transform:translateY(-4px);border-color:rgba(163,230,53,.5)}
-  .feat .ic{font-size:30px}
-  .feat h3{margin:10px 0 6px;font-size:1.06rem}
-  .feat p{color:var(--muted);font-size:.93rem}
-
-  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;counter-reset:step}
-  .step{background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:22px}
-  .step .n{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--lime),var(--lime2));color:#0A0F05;font-weight:900;display:grid;place-items:center}
-  .step h3{margin:12px 0 6px;font-size:1.02rem}
-  .step p{color:var(--muted);font-size:.93rem}
-
-  .rw{display:flex;gap:20px;align-items:center;flex-wrap:wrap;background:linear-gradient(120deg,rgba(163,230,53,.10),rgba(255,255,255,.03) 55%);border:1px solid rgba(163,230,53,.35);border-radius:24px;padding:26px}
-  .rw img{width:96px;height:96px;border-radius:20px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
-  .rw .txt{flex:1;min-width:240px}
-  .rw h2{font-size:1.45rem;font-weight:900;margin-bottom:6px}
-  .rw p{color:var(--muted);font-size:.97rem}
-  .rw .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-  footer{margin-top:64px;border-top:1px solid var(--line);padding:26px 0 38px;color:var(--muted);font-size:.88rem}
-  footer .wrap{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-  #themeToggle{margin-left:14px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:18px;cursor:pointer;flex:none}
-  #themeToggle:hover{border-color:rgba(163,230,53,.55)}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <!-- ================= HERO ================= -->
 <header class="hero">
-  <video autoplay muted loop playsinline poster="https://images.pexels.com/videos/7628845/pexels-photo-7628845.jpeg">
+  <video id="vidNight" autoplay muted loop playsinline poster="https://images.pexels.com/videos/7628845/pexels-photo-7628845.jpeg">
     <source src="https://videos.pexels.com/video-files/7628845/7628845-hd_1280_720_25fps.mp4" type="video/mp4">
+  </video>
+  <video id="vidDay" muted loop playsinline poster="https://images.pexels.com/videos/5531385/pexels-photo-5531385.jpeg" style="display:none">
+    <source src="https://videos.pexels.com/video-files/5531385/5531385-hd_1280_720_24fps.mp4" type="video/mp4">
   </video>
   <div class="shade"></div><div class="glow"></div>
   <div class="wrap" style="position:relative;z-index:3;width:100%">
@@ -134,7 +46,7 @@
 
 <!-- ================= TRACKER ================= -->
 <section class="block wrap" id="tracker">
-  <div class="sec-head"><span class="tag">Live Tracker</span><h2>Watch it move, live</h2><span id="statusPill">● Not tracking</span></div>
+  <div class="sec-head"><span class="tag">Live Tracker</span><h2>Watch it move, live</h2><span class="user-chip" id="userChip"><img id="userPhoto" alt=""><span id="userName"></span><button id="signOutBtn">Sign out</button></span><span id="statusPill">● Not tracking</span></div>
   <div class="panel">
     <div id="map"></div>
     <div class="controls">
@@ -152,6 +64,16 @@
       <div class="stat"><div class="label">GPS Accuracy</div><div class="value"><span id="accuracy">—</span> <span>m</span></div></div>
     </div>
     <div id="msg"></div>
+    <div class="lock-overlay" id="lockOverlay">
+      <div class="lock-card">
+        <div class="lk">🔒</div>
+        <h3>Sign up to see the live location</h3>
+        <p>Location aur live tracking sirf un users ko dikhti hai jo sign up kar chuke hon. Signup bilkul free hai — ek click mein ho jata hai.</p>
+        <button class="auth-btn auth-google" id="googleBtn">🇬 Continue with Google</button>
+        <button class="auth-btn auth-fb" id="fbBtn">🇫 Continue with Facebook</button>
+        <div class="auth-err" id="authErr"></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -196,245 +118,20 @@
 <footer>
   <div class="wrap">
     <span>🚗 <strong style="color:var(--strong)">Rust Car Tracker</strong> — a Rust Innovations project by <a href="https://github.com/RashidMahmood25">Rashid Mahmood</a></span>
-    <span>Satellite map © Esri · Hero video: ArtHouse Studio via Pexels</span>
+    <span>Satellite map © Esri · Hero videos: ArtHouse Studio (night) & K (day) via Pexels</span>
   </div>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-/* Tracker logic (proven v1.1): live GPS + demo drive */
-"use strict";
-/* ============================================================
-   Rust Car Tracker — phone-as-GPS-tracker web app
-   Live mode : uses the phone's own GPS (Geolocation API)
-   Demo mode : simulates a drive so anyone can test instantly
-   ============================================================ */
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
-/* The map is WORLDWIDE (OpenStreetMap covers the whole planet) and the
-   phone's GPS satellites are global — this app works in any city of any
-   country. It opens on a world view and flies to YOUR city the moment
-   live tracking starts. */
-const WORLD_VIEW = [20, 10];
 
-const map = L.map('map').setView(WORLD_VIEW, 2);
-/* Satellite map (Esri World Imagery - free, no API key) + a labels layer
-   on top, so the dark theme gets a real-earth look with place names. */
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 19,
-  attribution: 'Satellite imagery (c) Esri, Maxar, Earthstar Geographics'
-}).addTo(map);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 19
-}).addTo(map);
 
-const carIcon = L.divIcon({ className: '', html: '<div class="car-icon">🚗</div>', iconSize: [32, 32], iconAnchor: [16, 16] });
-let marker = null;
-let trail = L.polyline([], { color: '#A3E635', weight: 5, opacity: 0.85 }).addTo(map);
 
-let watchId = null;        // geolocation watch handle
-let demoTimer = null;      // demo animation handle
-let clockTimer = null;     // trip clock
-let tripStart = null;      // Date when the current trip started
-let totalKm = 0;           // accumulated distance
-let lastPoint = null;      // last [lat, lng]
-let lastPointTime = null;  // timestamp of last point
 
-const $ = id => document.getElementById(id);
-const pill = $('statusPill');
-
-function showMsg(text) {
-  const m = $('msg');
-  if (!text) { m.style.display = 'none'; m.textContent = ''; return; }
-  m.textContent = text; m.style.display = 'block';
-}
-
-function setStatus(text, cls) {
-  pill.textContent = '● ' + text;
-  pill.className = cls || '';
-  pill.id = 'statusPill';
-}
-
-/* Great-circle distance between two GPS points, in kilometres */
-function haversineKm(a, b) {
-  const R = 6371, toRad = d => d * Math.PI / 180;
-  const dLat = toRad(b[0] - a[0]), dLng = toRad(b[1] - a[1]);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
-}
-
-function startClock() {
-  tripStart = Date.now();
-  clockTimer = setInterval(() => {
-    const s = Math.floor((Date.now() - tripStart) / 1000);
-    $('tripTime').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
-  }, 1000);
-}
-
-function stopClock() { if (clockTimer) { clearInterval(clockTimer); clockTimer = null; } }
-
-/* Every new GPS point flows through here — live or demo */
-function handlePoint(lat, lng, speedMs, accuracyM) {
-  const point = [lat, lng];
-  const now = Date.now();
-
-  if (lastPoint) {
-    const d = haversineKm(lastPoint, point);
-    /* Ignore GPS jitter smaller than ~3 metres */
-    if (d > 0.003) {
-      totalKm += d;
-      trail.addLatLng(point);
-      if ((speedMs === null || speedMs === undefined) && lastPointTime) {
-        const hours = (now - lastPointTime) / 3600000;
-        if (hours > 0) speedMs = (d / hours) / 3.6; /* km/h -> m/s */
-      }
-      lastPoint = point; lastPointTime = now;
-    }
-  } else {
-    lastPoint = point; lastPointTime = now;
-    trail.addLatLng(point);
-    map.setView(point, 15);
-  }
-
-  if (!marker) { marker = L.marker(point, { icon: carIcon }).addTo(map); }
-  else { marker.setLatLng(point); }
-  map.panTo(point);
-
-  $('speed').textContent = speedMs ? Math.round(speedMs * 3.6) : 0;
-  $('distance').textContent = totalKm.toFixed(2);
-  $('lat').textContent = lat.toFixed(6);
-  $('lng').textContent = lng.toFixed(6);
-  $('accuracy').textContent = accuracyM ? Math.round(accuracyM) : '—';
-}
-
-function setButtons(tracking) {
-  $('startBtn').disabled = tracking;
-  $('demoBtn').disabled = tracking;
-  $('stopBtn').disabled = !tracking;
-}
-
-/* ---------------- Live GPS mode ---------------- */
-function startLive() {
-  showMsg('');
-  if (!('geolocation' in navigator)) {
-    showMsg('This browser does not support GPS geolocation. Try the Demo Drive button instead.');
-    setStatus('GPS not supported', 'error');
-    return;
-  }
-  setStatus('Waiting for GPS…', 'demo');
-  watchId = navigator.geolocation.watchPosition(
-    pos => {
-      setStatus('Live tracking', 'live');
-      handlePoint(pos.coords.latitude, pos.coords.longitude, pos.coords.speed, pos.coords.accuracy);
-    },
-    err => {
-      stopAll();
-      setStatus('GPS error', 'error');
-      showMsg('Could not get your location (' + err.message + '). Allow location permission for this site, keep GPS/location services ON, and try again — or use Demo Drive.');
-    },
-    { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 }
-  );
-  startClock();
-  setButtons(true);
-}
-
-/* ---------------- Demo mode ----------------
-   A short simulated route in Gulberg / Main Boulevard, Lahore,
-   so the app can be tested anywhere with no GPS at all.     */
-const DEMO_ROUTE = [
-  [31.5102, 74.3441], [31.5120, 74.3470], [31.5141, 74.3498], [31.5163, 74.3522],
-  [31.5189, 74.3544], [31.5216, 74.3563], [31.5244, 74.3579], [31.5273, 74.3591],
-  [31.5301, 74.3598], [31.5330, 74.3601], [31.5355, 74.3595], [31.5378, 74.3582]
-];
-
-function interpolate(route, stepsPerLeg) {
-  const pts = [];
-  for (let i = 0; i < route.length - 1; i++) {
-    for (let s = 0; s < stepsPerLeg; s++) {
-      pts.push([
-        route[i][0] + (route[i + 1][0] - route[i][0]) * (s / stepsPerLeg),
-        route[i][1] + (route[i + 1][1] - route[i][1]) * (s / stepsPerLeg)
-      ]);
-    }
-  }
-  pts.push(route[route.length - 1]);
-  return pts;
-}
-
-function startDemo() {
-  showMsg('');
-  setStatus('Demo drive', 'demo');
-  const pts = interpolate(DEMO_ROUTE, 6);
-  let i = 0;
-  startClock();
-  setButtons(true);
-  demoTimer = setInterval(() => {
-    if (i >= pts.length) { stopAll(); setStatus('Demo finished', ''); return; }
-    /* Simulated city speed: gentle variation between 24 and 42 km/h */
-    const fakeSpeedMs = (24 + 18 * Math.abs(Math.sin(i / 5))) / 3.6;
-    handlePoint(pts[i][0], pts[i][1], fakeSpeedMs, 8);
-    i++;
-  }, 700);
-}
-
-/* ---------------- Stop / clear ---------------- */
-function stopAll() {
-  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-  if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
-  stopClock();
-  setButtons(false);
-  if (pill.textContent.includes('tracking') || pill.textContent.includes('Demo')) setStatus('Stopped', '');
-}
-
-function clearRoute() {
-  stopAll();
-  trail.setLatLngs([]);
-  if (marker) { map.removeLayer(marker); marker = null; }
-  totalKm = 0; lastPoint = null; lastPointTime = null;
-  $('speed').textContent = '0'; $('distance').textContent = '0.00';
-  $('lat').textContent = '—'; $('lng').textContent = '—'; $('accuracy').textContent = '—';
-  $('tripTime').textContent = '00:00';
-  setStatus('Not tracking', '');
-  map.setView(WORLD_VIEW, 2);
-}
-
-/* If the visitor has ALREADY granted location permission to this site,
-   open the map over their own city (anywhere in the world) instead of the
-   world view. No prompt is triggered from here. */
-if (navigator.permissions && navigator.geolocation) {
-  navigator.permissions.query({ name: 'geolocation' }).then(result => {
-    if (result.state === 'granted') {
-      navigator.geolocation.getCurrentPosition(
-        pos => map.setView([pos.coords.latitude, pos.coords.longitude], 13),
-        () => {},
-        { timeout: 8000 }
-      );
-    }
-  }).catch(() => {});
-}
-
-$('startBtn').addEventListener('click', startLive);
-$('demoBtn').addEventListener('click', startDemo);
-$('stopBtn').addEventListener('click', stopAll);
-$('clearBtn').addEventListener('click', clearRoute);
-</script>
-<script>
-  // Hero CTAs: jump to the tracker and press the matching button
-  document.getElementById('ctaStart').addEventListener('click', () => setTimeout(() => document.getElementById('startBtn').click(), 450));
-  document.getElementById('ctaDemo').addEventListener('click', () => setTimeout(() => document.getElementById('demoBtn').click(), 450));
-</script>
-<script>
-  (function(){
-    const root = document.documentElement, btn = document.getElementById('themeToggle');
-    function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t === 'light' ? '🌙' : '☀️'; }
-    let saved = 'dark';
-    try { saved = localStorage.getItem('rct-theme') || 'dark'; } catch(e) {}
-    apply(saved === 'light' ? 'light' : 'dark');
-    btn.addEventListener('click', () => {
-      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-      apply(next);
-      try { localStorage.setItem('rct-theme', next); } catch(e) {}
-    });
-  })();
-</script>
+<script src="tracker.js"></script>
+<script src="theme.js"></script>
+<script src="auth.js"></script>
 </body>
 </html>
