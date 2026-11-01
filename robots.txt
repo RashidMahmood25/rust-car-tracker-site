@@ -1,0 +1,5 @@
+# Rust Car Tracker — robots
+User-agent: *
+Allow: /
+
+Sitemap: https://rashidmahmood25.github.io/rust-car-tracker-site/sitemap.xml
