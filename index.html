@@ -10,7 +10,11 @@
   :root{
     --bg:#060807; --bg2:#0B0E0A; --lime:#A3E635; --lime2:#65A30D; --mint:#BEF264;
     --ink:#F4F7F0; --muted:#9AA79B; --glass:rgba(255,255,255,.055); --line:rgba(255,255,255,.11);
-    --red:#F87171;
+    --red:#F87171; --strong:#FFFFFF; --panel:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+  }
+  :root[data-theme="light"]{
+    --bg:#F0F4E8; --bg2:#E6EDD8; --ink:#141C0D; --muted:#5A6B57; --glass:rgba(20,28,13,.055);
+    --line:rgba(20,28,13,.16); --strong:#101607; --panel:linear-gradient(180deg,#FFFFFF,#F4F8EC);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -52,7 +56,7 @@
   .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;flex-wrap:wrap}
   .sec-head h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:900}
   .sec-head .tag{color:var(--lime);font-weight:800;letter-spacing:.16em;font-size:.75rem;text-transform:uppercase}
-  .panel{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border:1px solid var(--line);border-radius:24px;padding:18px;backdrop-filter:blur(10px);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:18px;backdrop-filter:blur(10px);box-shadow:0 24px 60px rgba(0,0,0,.45)}
   #map{height:430px;border-radius:18px;border:1px solid var(--line);z-index:0;background:#0A0C0A}
   .car-icon{font-size:30px;text-align:center;line-height:1;filter:drop-shadow(0 4px 10px rgba(0,0,0,.7))}
   #statusPill{margin-left:auto;font-weight:700;font-size:.95rem;background:rgba(255,255,255,.06);border:1px solid var(--line);padding:8px 16px;border-radius:999px;color:#C6CFC2}
@@ -66,7 +70,7 @@
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}
   .stat{background:var(--glass);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
   .stat .label{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
-  .stat .value{font-size:1.55rem;font-weight:900;color:#fff;margin-top:2px}
+  .stat .value{font-size:1.55rem;font-weight:900;color:var(--strong);margin-top:2px}
   .stat .value span{font-size:.85rem;color:var(--lime);font-weight:700}
   #msg{display:none;margin-top:14px;border-radius:14px;padding:12px 16px;font-size:.94rem;background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.4);color:#FEF9C3}
 
@@ -87,10 +91,12 @@
   .rw img{width:96px;height:96px;border-radius:20px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
   .rw .txt{flex:1;min-width:240px}
   .rw h2{font-size:1.45rem;font-weight:900;margin-bottom:6px}
-  .rw p{color:#CBD5C6;font-size:.97rem}
+  .rw p{color:var(--muted);font-size:.97rem}
   .rw .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
   footer{margin-top:64px;border-top:1px solid var(--line);padding:26px 0 38px;color:var(--muted);font-size:.88rem}
   footer .wrap{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  #themeToggle{margin-left:14px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:18px;cursor:pointer;flex:none}
+  #themeToggle:hover{border-color:rgba(163,230,53,.55)}
 </style>
 </head>
 <body>
@@ -107,6 +113,7 @@
       <div class="links">
         <a href="#tracker">Live Tracker</a><a href="#features">Features</a><a href="#rustwheel">Rust Wheel</a><a href="#how">How it works</a>
       </div>
+      <button id="themeToggle" title="Dark / Light mode" aria-label="Toggle dark or light mode">☀️</button>
     </nav>
   </div>
   <div class="wrap hero-mid" style="width:100%">
@@ -137,7 +144,7 @@
       <button class="btn cbtn cbtn-ghost" id="clearBtn">↺ Clear Route</button>
     </div>
     <div class="stats">
-      <div class="stat"><div class="label">Speed</div><div class="value"><span id="speed" style="color:#fff;font-size:1.55rem">0</span> <span>km/h</span></div></div>
+      <div class="stat"><div class="label">Speed</div><div class="value"><span id="speed">0</span> <span>km/h</span></div></div>
       <div class="stat"><div class="label">Distance</div><div class="value"><span id="distance">0.00</span> <span>km</span></div></div>
       <div class="stat"><div class="label">Trip Time</div><div class="value" id="tripTime">00:00</div></div>
       <div class="stat"><div class="label">Latitude</div><div class="value" id="lat" style="font-size:1.15rem">—</div></div>
@@ -188,7 +195,7 @@
 
 <footer>
   <div class="wrap">
-    <span>🚗 <strong style="color:#fff">Rust Car Tracker</strong> — a Rust Innovations project by <a href="https://github.com/RashidMahmood25">Rashid Mahmood</a></span>
+    <span>🚗 <strong style="color:var(--strong)">Rust Car Tracker</strong> — a Rust Innovations project by <a href="https://github.com/RashidMahmood25">Rashid Mahmood</a></span>
     <span>Satellite map © Esri · Hero video: ArtHouse Studio via Pexels</span>
   </div>
 </footer>
@@ -414,6 +421,20 @@ $('clearBtn').addEventListener('click', clearRoute);
   // Hero CTAs: jump to the tracker and press the matching button
   document.getElementById('ctaStart').addEventListener('click', () => setTimeout(() => document.getElementById('startBtn').click(), 450));
   document.getElementById('ctaDemo').addEventListener('click', () => setTimeout(() => document.getElementById('demoBtn').click(), 450));
+</script>
+<script>
+  (function(){
+    const root = document.documentElement, btn = document.getElementById('themeToggle');
+    function apply(t){ root.setAttribute('data-theme', t); btn.textContent = t === 'light' ? '🌙' : '☀️'; }
+    let saved = 'dark';
+    try { saved = localStorage.getItem('rct-theme') || 'dark'; } catch(e) {}
+    apply(saved === 'light' ? 'light' : 'dark');
+    btn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      apply(next);
+      try { localStorage.setItem('rct-theme', next); } catch(e) {}
+    });
+  })();
 </script>
 </body>
 </html>
