@@ -1,4 +1,4 @@
-/* Rust Car Tracker — GPS tracking logic (live + demo drive, worldwide satellite/street map) */
+/* Rust Car Tracker — GPS tracking logic (live tracking + demo drive, worldwide satellite/street maps) */
 /* Tracker logic (proven v1.1): live GPS + demo drive */
 "use strict";
 /* ============================================================
@@ -118,6 +118,9 @@ function handlePoint(lat, lng, speedMs, accuracyM) {
   $('lat').textContent = lat.toFixed(6);
   $('lng').textContent = lng.toFixed(6);
   $('accuracy').textContent = accuracyM ? Math.round(accuracyM) : '—';
+
+  const kmhNow = parseFloat($('speed').textContent) || 0;
+  checkTools(point, kmhNow);
 }
 
 function setButtons(tracking) {
@@ -201,6 +204,7 @@ function stopAll() {
 
 function clearRoute() {
   stopAll();
+  clearNav(); clearFence();
   trail.setLatLngs([]);
   if (marker) { map.removeLayer(marker); marker = null; }
   totalKm = 0; lastPoint = null; lastPointTime = null;
@@ -235,3 +239,115 @@ $('clearBtn').addEventListener('click', clearRoute);
 // Hero CTAs: jump to the tracker and press the matching button
   document.getElementById('ctaStart').addEventListener('click', () => setTimeout(() => document.getElementById('startBtn').click(), 450));
   document.getElementById('ctaDemo').addEventListener('click', () => setTimeout(() => document.getElementById('demoBtn').click(), 450));
+
+/* ============================================================
+   TRIP TOOLS — Navigation (free OpenStreetMap routing),
+   Geofence alert, and Speed alert. All run in the browser.
+   ============================================================ */
+let navLine = null, navDest = null;
+let fence = null, fenceCenter = null, fenceOutside = false;
+let lastBeepAt = 0, audioCtx = null;
+
+function beep(times) {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = audioCtx.currentTime;
+    for (let i = 0; i < times; i++) {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.12, t0 + i * 0.25);
+      g.gain.exponentialRampToValueAtTime(0.001, t0 + i * 0.25 + 0.18);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t0 + i * 0.25); o.stop(t0 + i * 0.25 + 0.2);
+    }
+  } catch (e) {}
+}
+
+function needPos() {
+  if (!lastPoint) { showMsg('Start Live Tracking or Demo Drive first — these tools need your current location.'); return true; }
+  return false;
+}
+
+/* ---------- Navigation: free routing by OpenStreetMap (OSRM) ---------- */
+async function showRoute() {
+  const q = $('destIn').value.trim();
+  if (!q) { showMsg('Type a destination first — a place name (e.g. "Liberty Market, Lahore") or coordinates like 31.52, 74.35.'); return; }
+  if (needPos()) return;
+  $('navInfo').textContent = 'Finding the best road route…';
+  try {
+    let dest = null;
+    const m = q.match(/(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)/);
+    if (m) { dest = [parseFloat(m[1]), parseFloat(m[2])]; }
+    else {
+      const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(q));
+      const j = await r.json();
+      if (!j.length) throw new Error('place not found');
+      dest = [parseFloat(j[0].lat), parseFloat(j[0].lon)];
+    }
+    const rr = await fetch('https://router.project-osrm.org/route/v1/driving/' + lastPoint[1] + ',' + lastPoint[0] + ';' + dest[1] + ',' + dest[0] + '?overview=full&geometries=geojson');
+    const rj = await rr.json();
+    if (rj.code !== 'Ok' || !rj.routes.length) throw new Error('no route');
+    const route = rj.routes[0];
+    const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+    clearNav();
+    navLine = L.polyline(coords, { color: '#38BDF8', weight: 5, opacity: 0.9 }).addTo(map);
+    navDest = L.marker(dest).addTo(map);
+    map.fitBounds(navLine.getBounds(), { padding: [30, 30] });
+    $('navInfo').textContent = 'Route found: ' + (route.distance / 1000).toFixed(1) + ' km · about ' + Math.max(1, Math.round(route.duration / 60)) + ' minutes by road.';
+  } catch (e) {
+    $('navInfo').textContent = 'Could not find that route — check the place name and try again.';
+  }
+}
+function clearNav() {
+  if (navLine) { map.removeLayer(navLine); navLine = null; }
+  if (navDest) { map.removeLayer(navDest); navDest = null; }
+  const ni = $('navInfo'); if (ni) ni.textContent = '';
+}
+
+/* ---------- Geofence: alert when the car leaves a circle ---------- */
+function setFence() {
+  if (needPos()) return;
+  const r = parseInt($('fenceRadius').value, 10);
+  clearFence();
+  fenceCenter = lastPoint.slice(); fenceOutside = false;
+  fence = L.circle(fenceCenter, { radius: r, color: accentColor(), weight: 2, fillColor: accentColor(), fillOpacity: 0.12 }).addTo(map);
+  $('fenceInfo').textContent = 'Geofence is ON: a ' + r + ' m circle around your current spot. An alert sounds if the car leaves it.';
+}
+function clearFence() {
+  if (fence) { map.removeLayer(fence); fence = null; }
+  fenceCenter = null; fenceOutside = false;
+  const fi = $('fenceInfo'); if (fi) fi.textContent = '';
+}
+
+/* ---------- Checks that run on every new GPS point ---------- */
+function checkTools(point, kmh) {
+  const limEl = $('speedLimit');
+  if (limEl) {
+    const lim = parseInt(limEl.value, 10);
+    const over = kmh > lim;
+    $('speed').parentElement.style.color = over ? '#F87171' : '';
+    if (over && Date.now() - lastBeepAt > 8000) {
+      lastBeepAt = Date.now(); beep(2);
+      showMsg('⚠️ Speed alert: ' + Math.round(kmh) + ' km/h — your limit is ' + lim + ' km/h.');
+    }
+  }
+  if (fence && fenceCenter) {
+    const dM = haversineKm(fenceCenter, point) * 1000;
+    const r = parseInt($('fenceRadius').value, 10);
+    if (dM > r && !fenceOutside) {
+      fenceOutside = true;
+      fence.setStyle({ color: '#F87171', fillColor: '#F87171' });
+      beep(3);
+      showMsg('🚨 Geofence alert: the car has LEFT the fenced area.');
+    } else if (dM <= r && fenceOutside) {
+      fenceOutside = false;
+      fence.setStyle({ color: accentColor(), fillColor: accentColor() });
+      showMsg('✅ The car is back inside the geofence.');
+    }
+  }
+}
+
+$('navBtn').addEventListener('click', showRoute);
+$('navClear').addEventListener('click', clearNav);
+$('fenceBtn').addEventListener('click', setFence);
+$('fenceClear').addEventListener('click', clearFence);

@@ -66,6 +66,8 @@
     const em = document.getElementById('emailIn').value.trim();
     const pw = document.getElementById('passIn').value;
     if (!em || !pw) { authError('Please enter your email and password.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { authError('Please enter a valid email address.'); return; }
+    if (pw.length < 6) { authError('Password is too weak — use at least 6 characters.'); return; }
     const p = emailMode === 'signup' ? auth.createUserWithEmailAndPassword(em, pw) : auth.signInWithEmailAndPassword(em, pw);
     p.catch(e => authError(friendly(e)));
   });

@@ -129,3 +129,13 @@
   .auth-phone{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
   .auth-link{background:none;border:none;color:var(--lime2);font-size:.85rem;margin-top:10px;cursor:pointer;text-decoration:underline}
   :root[data-theme="light"] .auth-link{color:var(--lime)}
+
+  .tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:16px;text-align:left}
+  .tool{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .tool h4{margin:0 0 4px;font-size:1rem;color:var(--strong)}
+  .tool .auth-inp{margin-top:8px}
+  .tool-row{display:flex;gap:8px;margin-top:10px}
+  .tbtn{flex:1;padding:10px;border-radius:10px;border:none;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--lime),var(--lime2));color:#0A0F05;font-size:.9rem}
+  :root[data-theme="light"] .tbtn{color:#FFFFFF}
+  .tbtn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .tool-info{font-size:.85rem;color:var(--muted);margin:10px 0 0;min-height:1.1em}

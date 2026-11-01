@@ -93,6 +93,35 @@
       <div class="stat"><div class="label">GPS Accuracy</div><div class="value"><span id="accuracy">—</span> <span>m</span></div></div>
     </div>
     <div id="msg"></div>
+    <div class="tools">
+      <div class="tool">
+        <h4>🧭 Navigation</h4>
+        <input class="auth-inp" id="destIn" type="text" placeholder="Destination — place name or lat, lng">
+        <div class="tool-row"><button class="tbtn" id="navBtn">Show route</button><button class="tbtn ghost" id="navClear">Clear</button></div>
+        <p class="tool-info" id="navInfo"></p>
+      </div>
+      <div class="tool">
+        <h4>⭕ Geofence</h4>
+        <select class="auth-inp" id="fenceRadius">
+          <option value="200">Circle: 200 metres</option>
+          <option value="500" selected>Circle: 500 metres</option>
+          <option value="1000">Circle: 1 kilometre</option>
+        </select>
+        <div class="tool-row"><button class="tbtn" id="fenceBtn">Set at my location</button><button class="tbtn ghost" id="fenceClear">Clear</button></div>
+        <p class="tool-info" id="fenceInfo"></p>
+      </div>
+      <div class="tool">
+        <h4>🚨 Speed alert</h4>
+        <select class="auth-inp" id="speedLimit">
+          <option value="40">Limit: 40 km/h</option>
+          <option value="60">Limit: 60 km/h</option>
+          <option value="80">Limit: 80 km/h</option>
+          <option value="100" selected>Limit: 100 km/h</option>
+          <option value="120">Limit: 120 km/h</option>
+        </select>
+        <p class="tool-info">A warning sounds when the speed crosses your limit. Tip: choose 40 km/h to test it with Demo Drive.</p>
+      </div>
+    </div>
     <div class="lock-overlay" id="lockOverlay">
       <div class="lock-card">
         <div class="lk">🔒</div>
@@ -100,7 +129,7 @@
         <p>Live location and tracking are visible only to signed-up users. Signing up is completely free — use Google, your email, or your phone number.</p>
         <button class="auth-btn auth-google" id="googleBtn">🇬 Continue with Google</button>
         <div class="auth-div"><span>or</span></div>
-        <input class="auth-inp" id="emailIn" type="email" placeholder="Email address" autocomplete="email">
+        <input class="auth-inp" id="emailIn" type="text" inputmode="email" placeholder="Email address" autocomplete="email">
         <input class="auth-inp" id="passIn" type="password" placeholder="Password (min. 6 characters)" autocomplete="current-password">
         <button class="auth-btn auth-mail" id="emailBtn">✉️ Create account with Email</button>
         <button class="auth-link" id="emailToggle">Already have an account? Log in</button>
@@ -125,7 +154,10 @@
     <div class="feat"><div class="ic">🌍</div><h3>Worldwide coverage</h3><p>The map covers the whole planet and GPS satellites are global — Lahore, Dubai, London or New York, tracking starts in your own city.</p></div>
     <div class="feat"><div class="ic">🛰️</div><h3>Live, second by second</h3><p>Your car's marker glides along the map in real time with speed, distance and trip time updating as you drive.</p></div>
     <div class="feat"><div class="ic">📱</div><h3>No device to buy</h3><p>Forget expensive GPS trackers and wiring. Any smartphone you already own becomes the tracker — just open this page.</p></div>
-    <div class="feat"><div class="ic">🔒</div><h3>Private by design</h3><p>No account, no sign-up, no server. In this version your location is processed on your own device and goes nowhere else.</p></div>
+    <div class="feat"><div class="ic">🔒</div><h3>Private by design</h3><p>Your location is processed on your own device — the live map unlocks only for your signed-in account.</p></div>
+  <div class="feat"><div class="ic">🧭</div><h3>Navigation</h3><p>Type any destination and get the real road route on the map, with distance and travel time — free, powered by OpenStreetMap.</p></div>
+    <div class="feat"><div class="ic">⭕</div><h3>Geofence alerts</h3><p>Draw a safe circle around your home or office. If the car leaves it, the tracker alerts you instantly with sound.</p></div>
+    <div class="feat"><div class="ic">🚨</div><h3>Speed alerts</h3><p>Set your own speed limit. Cross it and the tracker warns you with a beep — handy for family cars and new drivers.</p></div>
   </div>
 </section>
 
