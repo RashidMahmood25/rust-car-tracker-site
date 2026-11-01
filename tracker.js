@@ -138,6 +138,7 @@ function startLive() {
     setStatus('GPS not supported', 'error');
     return;
   }
+  resetTripStats();
   setStatus('Waiting for GPS…', 'demo');
   watchId = navigator.geolocation.watchPosition(
     pos => {
@@ -178,8 +179,17 @@ function interpolate(route, stepsPerLeg) {
   return pts;
 }
 
+function resetTripStats() {
+  totalKm = 0; lastPoint = null; lastPointTime = null;
+  if (trail) trail.setLatLngs([]);
+  $('speed').textContent = '0'; $('distance').textContent = '0.00';
+  $('lat').textContent = '—'; $('lng').textContent = '—'; $('accuracy').textContent = '—';
+  $('tripTime').textContent = '00:00';
+}
+
 function startDemo() {
   showMsg('');
+  resetTripStats();
   setStatus('Demo drive', 'demo');
   const pts = interpolate(DEMO_ROUTE, 6);
   let i = 0;
@@ -463,23 +473,38 @@ window.__onGuardLogin = function () {
     }
   });
 };
-function guardPinOk() {
+let pinResolve = null;
+function inlinePin(placeholder) {
+  return new Promise(res => {
+    pinResolve = res;
+    const inp = $('guardPinInput');
+    inp.value = ''; inp.placeholder = placeholder;
+    $('guardPinRow').style.display = 'flex';
+    setTimeout(() => inp.focus(), 30);
+  });
+}
+function closePin(v) { $('guardPinRow').style.display = 'none'; if (pinResolve) { const r = pinResolve; pinResolve = null; r(v); } }
+$('guardPinOk').addEventListener('click', () => closePin($('guardPinInput').value));
+$('guardPinCancel').addEventListener('click', () => closePin(null));
+$('guardPinInput').addEventListener('keydown', e => { if (e.key === 'Enter') closePin(e.target.value); else if (e.key === 'Escape') closePin(null); });
+async function guardPinOk() {
   const pin = localStorage.getItem('rct-guard-pin');
   if (!pin) return true;
-  return prompt('Enter your Guard PIN:') === pin;
+  const entered = await inlinePin('Enter your Guard PIN');
+  return entered !== null && entered === pin;
 }
-$('guardBtn').addEventListener('click', () => {
+$('guardBtn').addEventListener('click', async () => {
   if (!guardArmed) { armGuard(); return; }
-  if (!guardPinOk()) { showMsg('Wrong PIN — the guard stays ON.'); return; }
+  if (!await guardPinOk()) { showMsg('Wrong PIN — the guard stays ON.'); return; }
   disarmGuard();
 });
-$('guardPinBtn').addEventListener('click', () => {
-  const p = prompt('Set a Guard PIN (leave empty to remove it):');
+$('guardPinBtn').addEventListener('click', async () => {
+  const p = await inlinePin('Set a Guard PIN (empty = remove it)');
   if (p === null) return;
   if (p.trim() === '') { localStorage.removeItem('rct-guard-pin'); showMsg('Guard PIN removed.'); }
   else { localStorage.setItem('rct-guard-pin', p.trim()); showMsg('Guard PIN set — you will need it to disarm.'); }
 });
-$('alarmOff').addEventListener('click', () => {
-  if (!guardPinOk()) return;
+$('alarmOff').addEventListener('click', async () => {
+  if (!await guardPinOk()) { showMsg('Wrong PIN — the alarm stays ON.'); return; }
   if (guardArmed) disarmGuard(); else stopAlarm();
 });

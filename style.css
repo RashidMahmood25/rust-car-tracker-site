@@ -166,4 +166,6 @@
 
   #alarmBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#B91C1C;color:#fff;padding:14px 18px;font-weight:800;align-items:center;justify-content:space-between;gap:12px;animation:alarmflash .6s infinite alternate;box-shadow:0 10px 40px rgba(0,0,0,.5)}
   #alarmBanner button{background:#fff;color:#B91C1C;border:none;font-weight:900;padding:9px 16px;border-radius:999px;cursor:pointer;flex:none}
+  #guardPinRow{display:none;gap:8px;margin-top:10px;flex-wrap:wrap}
+  #guardPinRow input{flex:1;min-width:130px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--ink);font-size:15px}
   @keyframes alarmflash{from{background:#B91C1C}to{background:#7F1D1D}}
