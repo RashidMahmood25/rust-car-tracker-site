@@ -23,7 +23,7 @@
   <p>Rust Car Tracker is a web app that turns a smartphone into a live GPS car tracker. This page explains, in plain words, what information the app uses and what it does not.</p>
 
   <h2>Sign-in information</h2>
-  <p>To see the live location, you sign in with Google or Facebook. Sign-in is handled by Google Firebase Authentication. We receive your name, email address and profile photo from the provider you choose, only to show your account inside the app. We never see or store your Google or Facebook password.</p>
+  <p>To see the live location, you sign in with Google, with your email and password, or with your phone number (SMS code). Sign-in is handled by Google Firebase Authentication. We receive your name, email address, phone number and profile photo from the method you choose, only to show your account inside the app. We never see your Google password, and your email password is stored securely by Firebase — never in plain text.</p>
 
   <h2>Location data</h2>
   <p>Live tracking uses your phone's own GPS, inside your browser. In the current version, your location is processed on your device to draw the map, route, speed and distance on your own screen. We do not run a server that collects or stores your location history.</p>
@@ -38,7 +38,7 @@
   <p>You can delete your data at any time:</p>
   <ul>
     <li><strong>Sign out</strong> from the app to end your session on that device.</li>
-    <li><strong>Revoke access</strong> in your Google Account (Security → Third-party access) or Facebook Settings (Apps and Websites → Rust Car Tracker → Remove).</li>
+    <li><strong>Revoke access</strong> in your Google Account (Security → Third-party access) if you signed in with Google.</li>
     <li><strong>Delete your sign-in record completely:</strong> email us at <a href="mailto:rashidmahmood9484@gmail.com">rashidmahmood9484@gmail.com</a> from your signed-in email address with the subject "Delete my Rust Car Tracker account" and we will delete your authentication record.</li>
   </ul>
 

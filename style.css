@@ -119,3 +119,13 @@
   :root[data-theme="light"] .rw{background:linear-gradient(120deg,rgba(124,58,237,.10),rgba(255,255,255,.35) 55%);border-color:rgba(124,58,237,.35)}
   :root[data-theme="light"] #themeToggle:hover{border-color:rgba(124,58,237,.55)}
   :root[data-theme="light"] .lock-card{border-color:rgba(124,58,237,.45)}
+
+  .auth-div{display:flex;align-items:center;gap:10px;margin:14px 0 4px;color:var(--muted);font-size:.8rem}
+  .auth-div::before,.auth-div::after{content:'';flex:1;height:1px;background:var(--line)}
+  .auth-inp{width:100%;padding:12px 14px;margin-top:10px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:.95rem}
+  .auth-inp::placeholder{color:var(--muted)}
+  .auth-mail{background:linear-gradient(135deg,var(--lime),var(--lime2));color:#0A0F05}
+  :root[data-theme="light"] .auth-mail{color:#FFFFFF}
+  .auth-phone{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+  .auth-link{background:none;border:none;color:var(--lime2);font-size:.85rem;margin-top:10px;cursor:pointer;text-decoration:underline}
+  :root[data-theme="light"] .auth-link{color:var(--lime)}
