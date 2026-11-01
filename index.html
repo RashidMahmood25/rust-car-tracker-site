@@ -189,7 +189,7 @@
 <footer>
   <div class="wrap">
     <span>🚗 <strong style="color:#fff">Rust Car Tracker</strong> — a Rust Innovations project by <a href="https://github.com/RashidMahmood25">Rashid Mahmood</a></span>
-    <span>Map © OpenStreetMap contributors © CARTO · Hero video: ArtHouse Studio via Pexels</span>
+    <span>Satellite map © Esri · Hero video: ArtHouse Studio via Pexels</span>
   </div>
 </footer>
 
@@ -210,9 +210,14 @@
 const WORLD_VIEW = [20, 10];
 
 const map = L.map('map').setView(WORLD_VIEW, 2);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+/* Satellite map (Esri World Imagery - free, no API key) + a labels layer
+   on top, so the dark theme gets a real-earth look with place names. */
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   maxZoom: 19,
-  attribution: '© OpenStreetMap contributors © CARTO'
+  attribution: 'Satellite imagery (c) Esri, Maxar, Earthstar Geographics'
+}).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19
 }).addTo(map);
 
 const carIcon = L.divIcon({ className: '', html: '<div class="car-icon">🚗</div>', iconSize: [32, 32], iconAnchor: [16, 16] });
