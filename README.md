@@ -1,6 +1,6 @@
 # 🚗📱 Rust Car Tracker — Live Website
 
-Public live website of **Rust Car Tracker** (a Rust Innovations project): a web app that turns any smartphone into a live GPS car tracker — worldwide maps, live speed/distance dashboard, dark (night) / light (day) themes, and sign-up with Google/Facebook to unlock the live location.
+Public live website of **Rust Car Tracker** (a Rust Wheel project): a web app that turns any smartphone into a live GPS car tracker — worldwide maps, live speed/distance dashboard, dark (night) / light (day) themes, and sign-up with Google/Facebook to unlock the live location.
 
 **Live site:** https://rashidmahmood25.github.io/rust-car-tracker-site/
 
