@@ -37,11 +37,13 @@ window.__applyMapTheme = function(t){
     map.removeLayer(streetBase);
     satBase.addTo(map); satLabels.addTo(map);
   }
+  try { trail.setStyle({ color: accentColor() }); } catch(e) {}
 };
 
 const carIcon = L.divIcon({ className: '', html: '<div class="car-icon">🚗</div>', iconSize: [32, 32], iconAnchor: [16, 16] });
 let marker = null;
-let trail = L.polyline([], { color: '#A3E635', weight: 5, opacity: 0.85 }).addTo(map);
+function accentColor(){ try { return getComputedStyle(document.documentElement).getPropertyValue('--lime').trim() || '#A3E635'; } catch(e) { return '#A3E635'; } }
+let trail = L.polyline([], { color: accentColor(), weight: 5, opacity: 0.85 }).addTo(map);
 
 let watchId = null;        // geolocation watch handle
 let demoTimer = null;      // demo animation handle
