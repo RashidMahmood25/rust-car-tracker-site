@@ -6,7 +6,7 @@
   }
   :root[data-theme="light"]{
     --bg:#F0F4E8; --bg2:#E6EDD8; --ink:#141C0D; --muted:#5A6B57; --glass:rgba(20,28,13,.055);
-    --line:rgba(20,28,13,.16); --strong:#101607; --lime:#7C3AED; --lime2:#5B21B6; --mint:#9333EA; --hero-sub:#26331F; --chip-bg:rgba(255,255,255,.55); --chip-ink:#22301A; --panel:linear-gradient(180deg,#FFFFFF,#F4F8EC);
+    --line:rgba(20,28,13,.16); --strong:#101607; --lime:#65A30D; --lime2:#4D7C0F; --mint:#84CC16; --hero-sub:#26331F; --chip-bg:rgba(255,255,255,.55); --chip-ink:#22301A; --panel:linear-gradient(180deg,#FFFFFF,#F4F8EC);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -90,9 +90,9 @@
   #themeToggle{margin-left:14px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:18px;cursor:pointer;flex:none}
   #themeToggle:hover{border-color:rgba(163,230,53,.55)}
 
-  .lock-overlay{position:absolute;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(5,8,5,.45);backdrop-filter:blur(7px);border-radius:24px;padding:18px}
-  .lock-card{background:var(--panel);border:1px solid rgba(163,230,53,.4);border-radius:22px;padding:30px 28px;max-width:420px;width:100%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5)}
-  .lock-card .lk{font-size:40px}
+  .lock-overlay{position:absolute;inset:0;z-index:500;display:flex;align-items:flex-start;justify-content:center;background:rgba(5,8,5,.45);backdrop-filter:blur(7px);border-radius:24px;padding:22px 14px;overflow-y:auto}
+  .lock-card{background:var(--panel);border:1px solid rgba(163,230,53,.4);border-radius:22px;padding:26px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5);margin:0 auto}
+  .lock-card .lk{font-size:34px}
   .lock-card h3{font-size:1.35rem;font-weight:900;margin:10px 0 6px}
   .lock-card p{color:var(--muted);font-size:.95rem}
   .auth-btn{display:flex;align-items:center;justify-content:center;gap:11px;width:100%;border:none;cursor:pointer;font:inherit;font-weight:800;font-size:1rem;padding:13px 18px;border-radius:999px;margin-top:12px;transition:transform .15s}
@@ -105,27 +105,27 @@
   .user-chip button{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
 
   :root[data-theme="light"] .hero .shade{background:linear-gradient(180deg,rgba(255,255,255,.48) 0%,rgba(255,255,255,.18) 42%,rgba(240,244,232,1) 100%)}
-  :root[data-theme="light"] h1.display .grad{background:linear-gradient(92deg,#7C3AED,#9333EA 55%,#D946EF);-webkit-background-clip:text;background-clip:text;color:transparent}
+  :root[data-theme="light"] h1.display .grad{background:linear-gradient(92deg,#4D7C0F,#65A30D 45%,#A3E635);-webkit-background-clip:text;background-clip:text;color:transparent}
   :root[data-theme="light"] .btn-glass{background:rgba(255,255,255,.55)}
-  :root[data-theme="light"] .btn-lime{color:#FFFFFF}
+  :root[data-theme="light"] .btn-lime{color:#0A0F05}
 
   /* Light mode: lime ki dhhal (tints) bhi purple */
-  :root[data-theme="light"] .hero .glow{background:radial-gradient(circle,rgba(124,58,237,.18),transparent 65%)}
-  :root[data-theme="light"] .brand .dot{box-shadow:0 0 24px rgba(124,58,237,.4)}
-  :root[data-theme="light"] .kicker{background:rgba(124,58,237,.10);border-color:rgba(124,58,237,.4)}
-  :root[data-theme="light"] .btn-lime{box-shadow:0 10px 34px rgba(124,58,237,.32)}
-  :root[data-theme="light"] #statusPill.live{border-color:rgba(124,58,237,.55)}
-  :root[data-theme="light"] .feat:hover{border-color:rgba(124,58,237,.5)}
-  :root[data-theme="light"] .rw{background:linear-gradient(120deg,rgba(124,58,237,.10),rgba(255,255,255,.35) 55%);border-color:rgba(124,58,237,.35)}
-  :root[data-theme="light"] #themeToggle:hover{border-color:rgba(124,58,237,.55)}
-  :root[data-theme="light"] .lock-card{border-color:rgba(124,58,237,.45)}
+  :root[data-theme="light"] .hero .glow{background:radial-gradient(circle,rgba(163,230,53,.16),transparent 65%)}
+  :root[data-theme="light"] .brand .dot{box-shadow:0 0 24px rgba(163,230,53,.45)}
+  :root[data-theme="light"] .kicker{background:rgba(163,230,53,.12);border-color:rgba(163,230,53,.45)}
+  :root[data-theme="light"] .btn-lime{box-shadow:0 10px 34px rgba(101,163,13,.35)}
+  :root[data-theme="light"] #statusPill.live{border-color:rgba(101,163,13,.55)}
+  :root[data-theme="light"] .feat:hover{border-color:rgba(101,163,13,.5)}
+  :root[data-theme="light"] .rw{background:linear-gradient(120deg,rgba(163,230,53,.12),rgba(255,255,255,.35) 55%);border-color:rgba(163,230,53,.35)}
+  :root[data-theme="light"] #themeToggle:hover{border-color:rgba(101,163,13,.55)}
+  :root[data-theme="light"] .lock-card{border-color:rgba(163,230,53,.45)}
 
   .auth-div{display:flex;align-items:center;gap:10px;margin:14px 0 4px;color:var(--muted);font-size:.8rem}
   .auth-div::before,.auth-div::after{content:'';flex:1;height:1px;background:var(--line)}
   .auth-inp{width:100%;padding:12px 14px;margin-top:10px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:.95rem}
   .auth-inp::placeholder{color:var(--muted)}
   .auth-mail{background:linear-gradient(135deg,var(--lime),var(--lime2));color:#0A0F05}
-  :root[data-theme="light"] .auth-mail{color:#FFFFFF}
+  :root[data-theme="light"] .auth-mail{color:#0A0F05}
   .auth-phone{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
   .auth-link{background:none;border:none;color:var(--lime2);font-size:.85rem;margin-top:10px;cursor:pointer;text-decoration:underline}
   :root[data-theme="light"] .auth-link{color:var(--lime)}
@@ -136,7 +136,7 @@
   .tool .auth-inp{margin-top:8px}
   .tool-row{display:flex;gap:8px;margin-top:10px}
   .tbtn{flex:1;padding:10px;border-radius:10px;border:none;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--lime),var(--lime2));color:#0A0F05;font-size:.9rem}
-  :root[data-theme="light"] .tbtn{color:#FFFFFF}
+  :root[data-theme="light"] .tbtn{color:#0A0F05}
   .tbtn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
   .tool-info{font-size:.85rem;color:var(--muted);margin:10px 0 0;min-height:1.1em}
 
