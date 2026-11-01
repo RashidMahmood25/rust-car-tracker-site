@@ -1,8 +1,8 @@
-/* Rust Car Tracker — GPS tracking logic (live tracking + demo drive, worldwide satellite/street maps) */
+/* Rust Tracker — GPS tracking logic (live tracking + demo drive, worldwide satellite/street maps) */
 /* Tracker logic (proven v1.1): live GPS + demo drive */
 "use strict";
 /* ============================================================
-   Rust Car Tracker — phone-as-GPS-tracker web app
+   Rust Tracker — phone-as-GPS-tracker web app
    Live mode : uses the phone's own GPS (Geolocation API)
    Demo mode : simulates a drive so anyone can test instantly
    ============================================================ */
@@ -40,7 +40,7 @@ window.__applyMapTheme = function(t){
   try { trail.setStyle({ color: accentColor() }); } catch(e) {}
 };
 
-const carIcon = L.divIcon({ className: '', html: '<div class="car-icon">🚗</div>', iconSize: [32, 32], iconAnchor: [16, 16] });
+const carIcon = L.divIcon({ className: '', html: '<div class="car-icon">📍</div>', iconSize: [32, 32], iconAnchor: [16, 16] });
 let marker = null;
 function accentColor(){ try { return getComputedStyle(document.documentElement).getPropertyValue('--lime').trim() || '#A3E635'; } catch(e) { return '#A3E635'; } }
 let trail = L.polyline([], { color: accentColor(), weight: 5, opacity: 0.85 }).addTo(map);
@@ -121,6 +121,7 @@ function handlePoint(lat, lng, speedMs, accuracyM) {
 
   const kmhNow = parseFloat($('speed').textContent) || 0;
   checkTools(point, kmhNow);
+  guardCheck(point);
 }
 
 function setButtons(tracking) {
@@ -311,7 +312,7 @@ function setFence() {
   clearFence();
   fenceCenter = lastPoint.slice(); fenceOutside = false;
   fence = L.circle(fenceCenter, { radius: r, color: accentColor(), weight: 2, fillColor: accentColor(), fillOpacity: 0.12 }).addTo(map);
-  $('fenceInfo').textContent = 'Geofence is ON: a ' + r + ' m circle around your current spot. An alert sounds if the car leaves it.';
+  $('fenceInfo').textContent = 'Geofence is ON: a ' + r + ' m circle around your current spot. An alert sounds if your vehicle leaves it.';
 }
 function clearFence() {
   if (fence) { map.removeLayer(fence); fence = null; }
@@ -338,11 +339,11 @@ function checkTools(point, kmh) {
       fenceOutside = true;
       fence.setStyle({ color: '#F87171', fillColor: '#F87171' });
       beep(3);
-      showMsg('🚨 Geofence alert: the car has LEFT the fenced area.');
+      showMsg('🚨 Geofence alert: your vehicle has LEFT the fenced area.');
     } else if (dM <= r && fenceOutside) {
       fenceOutside = false;
       fence.setStyle({ color: accentColor(), fillColor: accentColor() });
-      showMsg('✅ The car is back inside the geofence.');
+      showMsg('✅ Your vehicle is back inside the geofence.');
     }
   }
 }
@@ -351,3 +352,134 @@ $('navBtn').addEventListener('click', showRoute);
 $('navClear').addEventListener('click', clearNav);
 $('fenceBtn').addEventListener('click', setFence);
 $('fenceClear').addEventListener('click', clearFence);
+
+/* ============================================================
+   GUARD MODE (website theft guard) — arm when parked.
+   Triggers: car moves >60 m, phone shakes, charger unplugged.
+   Alarm: siren + flashing banner here AND on the owner's
+   other signed-in device (via Firebase Realtime Database).
+   ============================================================ */
+let guardArmed = false, guardPoint = null, guardAlarmOn = false;
+let sirenTimer = null, sirenCtx = null, lastGuardPushAt = 0, remoteMarker = null;
+
+function guardRef() {
+  try {
+    if (window.firebase && firebase.apps && firebase.apps.length && window.__uid && firebase.database) {
+      return firebase.database().ref('guard/' + window.__uid);
+    }
+  } catch (e) {}
+  return null;
+}
+function guardPush(extra) {
+  const r = guardRef(); if (!r) return;
+  const data = { armed: guardArmed, alarm: guardAlarmOn, ts: Date.now() };
+  if (lastPoint) { data.lat = lastPoint[0]; data.lng = lastPoint[1]; }
+  if (extra) Object.assign(data, extra);
+  r.set(data).catch(() => {});
+}
+function guardSetInfo(t) { const el = $('guardInfo'); if (el) el.textContent = t; }
+
+function armGuard() {
+  if (!lastPoint) { startLive(); showMsg('Starting GPS first — wait for the marker dot, then press Arm Guard again.'); return; }
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission().catch(() => {});
+  }
+  guardArmed = true; guardPoint = lastPoint.slice(); guardAlarmOn = false;
+  window.addEventListener('devicemotion', guardMotion);
+  if (navigator.getBattery) navigator.getBattery().then(b => b.addEventListener('chargingchange', guardCharge)).catch(() => {});
+  $('guardBtn').textContent = '🔓 Disarm Guard';
+  guardSetInfo('Guard is ON — watching movement, shaking and the charger. Keep this tab open and the phone plugged in.');
+  guardPush({ reason: '' });
+  showMsg('🛡️ Guard armed at your parked spot.');
+}
+function disarmGuard() {
+  guardArmed = false;
+  stopAlarm();
+  window.removeEventListener('devicemotion', guardMotion);
+  $('guardBtn').textContent = '🛡️ Arm Guard';
+  guardSetInfo('Guard is off.');
+  guardPush({ reason: '' });
+}
+function guardMotion(e) {
+  if (!guardArmed || guardAlarmOn) return;
+  const a = e.accelerationIncludingGravity; if (!a) return;
+  const mag = Math.sqrt((a.x || 0) ** 2 + (a.y || 0) ** 2 + (a.z || 0) ** 2);
+  if (Math.abs(mag - 9.8) > 7) triggerAlarm('Your vehicle was shaken or pushed.');
+}
+function guardCharge() { if (guardArmed && !guardAlarmOn) triggerAlarm('The charger was disconnected.'); }
+function guardCheck(point) {
+  if (!guardArmed) return;
+  if (Date.now() - lastGuardPushAt > 15000) { lastGuardPushAt = Date.now(); guardPush({}); }
+  if (!guardAlarmOn && guardPoint) {
+    const dM = haversineKm(guardPoint, point) * 1000;
+    if (dM > 60) triggerAlarm('Your vehicle moved ' + Math.round(dM) + ' m away from its parked spot.');
+  }
+}
+function triggerAlarm(why) {
+  if (guardAlarmOn) return;
+  guardAlarmOn = true;
+  $('alarmWhy').textContent = why;
+  $('alarmBanner').style.display = 'flex';
+  startSiren();
+  if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+  guardSetInfo('🚨 ALARM: ' + why);
+  guardPush({ reason: why });
+}
+function stopAlarm() {
+  guardAlarmOn = false;
+  const b = $('alarmBanner'); if (b) b.style.display = 'none';
+  if (sirenTimer) { clearInterval(sirenTimer); sirenTimer = null; }
+}
+function startSiren() {
+  try {
+    sirenCtx = sirenCtx || new (window.AudioContext || window.webkitAudioContext)();
+    let hi = false;
+    const blip = () => {
+      const o = sirenCtx.createOscillator(), g = sirenCtx.createGain();
+      o.type = 'square'; o.frequency.value = hi ? 920 : 620; hi = !hi;
+      g.gain.setValueAtTime(0.05, sirenCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, sirenCtx.currentTime + 0.28);
+      o.connect(g); g.connect(sirenCtx.destination);
+      o.start(); o.stop(sirenCtx.currentTime + 0.3);
+    };
+    blip(); sirenTimer = setInterval(blip, 320);
+  } catch (e) {}
+}
+/* Owner's other device: listen for the car phone's alarm */
+window.__onGuardLogin = function () {
+  const r = guardRef(); if (!r) return;
+  r.on('value', snap => {
+    const v = snap.val(); if (!v) return;
+    if (v.alarm && !guardAlarmOn) {
+      guardAlarmOn = true;
+      $('alarmWhy').textContent = (v.reason || 'Theft alert.') + ' Last known location is marked on the map.';
+      $('alarmBanner').style.display = 'flex';
+      startSiren();
+      if (v.lat && v.lng) {
+        if (remoteMarker) map.removeLayer(remoteMarker);
+        remoteMarker = L.marker([v.lat, v.lng]).addTo(map);
+        map.setView([v.lat, v.lng], 15);
+      }
+    }
+  });
+};
+function guardPinOk() {
+  const pin = localStorage.getItem('rct-guard-pin');
+  if (!pin) return true;
+  return prompt('Enter your Guard PIN:') === pin;
+}
+$('guardBtn').addEventListener('click', () => {
+  if (!guardArmed) { armGuard(); return; }
+  if (!guardPinOk()) { showMsg('Wrong PIN — the guard stays ON.'); return; }
+  disarmGuard();
+});
+$('guardPinBtn').addEventListener('click', () => {
+  const p = prompt('Set a Guard PIN (leave empty to remove it):');
+  if (p === null) return;
+  if (p.trim() === '') { localStorage.removeItem('rct-guard-pin'); showMsg('Guard PIN removed.'); }
+  else { localStorage.setItem('rct-guard-pin', p.trim()); showMsg('Guard PIN set — you will need it to disarm.'); }
+});
+$('alarmOff').addEventListener('click', () => {
+  if (!guardPinOk()) return;
+  if (guardArmed) disarmGuard(); else stopAlarm();
+});

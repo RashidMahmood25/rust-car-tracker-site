@@ -90,8 +90,8 @@
   #themeToggle{margin-left:14px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:18px;cursor:pointer;flex:none}
   #themeToggle:hover{border-color:rgba(163,230,53,.55)}
 
-  .lock-overlay{position:absolute;inset:0;z-index:500;display:flex;align-items:flex-start;justify-content:center;background:rgba(5,8,5,.45);backdrop-filter:blur(7px);border-radius:24px;padding:22px 14px;overflow-y:auto}
-  .lock-card{background:var(--panel);border:1px solid rgba(163,230,53,.4);border-radius:22px;padding:26px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5);margin:0 auto}
+  .lock-overlay{position:absolute;inset:0;z-index:500;display:flex;align-items:flex-start;justify-content:center;background:rgba(5,8,5,.62);backdrop-filter:blur(10px);border-radius:24px;padding:22px 14px;overflow-y:auto}
+  .lock-card{background:linear-gradient(180deg,#161D10,#0B0F08);border:1px solid rgba(163,230,53,.4);border-radius:22px;padding:26px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5);margin:0 auto}
   .lock-card .lk{font-size:34px}
   .lock-card h3{font-size:1.35rem;font-weight:900;margin:10px 0 6px}
   .lock-card p{color:var(--muted);font-size:.95rem}
@@ -119,6 +119,7 @@
   :root[data-theme="light"] .rw{background:linear-gradient(120deg,rgba(163,230,53,.12),rgba(255,255,255,.35) 55%);border-color:rgba(163,230,53,.35)}
   :root[data-theme="light"] #themeToggle:hover{border-color:rgba(101,163,13,.55)}
   :root[data-theme="light"] .lock-card{border-color:rgba(163,230,53,.45)}
+  :root[data-theme="light"] .lock-card{background:linear-gradient(180deg,#FFFFFF,#F4F8EC)}
 
   .auth-div{display:flex;align-items:center;gap:10px;margin:14px 0 4px;color:var(--muted);font-size:.8rem}
   .auth-div::before,.auth-div::after{content:'';flex:1;height:1px;background:var(--line)}
@@ -162,3 +163,7 @@
   .contact-rows a{color:var(--lime2)}
   :root[data-theme="dark"] .contact-rows a{color:var(--lime)}
   @media (max-width:640px){ .contact-card{flex-direction:column;align-items:center;text-align:center} .contact-rows{justify-items:center} }
+
+  #alarmBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#B91C1C;color:#fff;padding:14px 18px;font-weight:800;align-items:center;justify-content:space-between;gap:12px;animation:alarmflash .6s infinite alternate;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  #alarmBanner button{background:#fff;color:#B91C1C;border:none;font-weight:900;padding:9px 16px;border-radius:999px;cursor:pointer;flex:none}
+  @keyframes alarmflash{from{background:#B91C1C}to{background:#7F1D1D}}

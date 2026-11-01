@@ -1,4 +1,4 @@
-/* Rust Car Tracker — Signup gate (Firebase Auth: Google + Email + Phone).
+/* Rust Tracker — Signup gate (Firebase Auth: Google + Email + Phone).
    The live location is visible only to signed-in users. */
   const firebaseConfig = {
     apiKey: "AIzaSyCkS_-y9Lql4u0oHEWl7yc2jPZFjpfjdSQ",
@@ -6,6 +6,7 @@
     projectId: "rust-car-tracker",
     storageBucket: "rust-car-tracker.firebasestorage.app",
     messagingSenderId: "834287739423",
+    databaseURL: "https://rust-car-tracker-default-rtdb.firebaseio.com",
     appId: "1:834287739423:web:1501ce57d393b637feab2a"
   };
   const lockEl = document.getElementById('lockOverlay');
@@ -31,6 +32,8 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   auth.onAuthStateChanged(user => {
+    window.__uid = user ? user.uid : null;
+    if (user && window.__onGuardLogin) { try { window.__onGuardLogin(); } catch (e) {} }
     if (user) {
       lockEl.style.display = 'none';
       const chip = document.getElementById('userChip');
