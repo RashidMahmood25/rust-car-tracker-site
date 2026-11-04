@@ -86,6 +86,34 @@ function startClock() {
 
 function stopClock() { if (clockTimer) { clearInterval(clockTimer); clockTimer = null; } }
 
+/* ---------- Place names (reverse geocoding) ----------
+   Coordinates alone mean nothing to a visitor, so positions are also
+   resolved to a human place name (area + city) through the free
+   OpenStreetMap Nominatim service. Results are cached on a ~110 m
+   grid and only one lookup runs at a time, so a moving car triggers
+   at most a lookup every few seconds — well inside fair use. */
+const geoCache = {};
+let geoInFlight = false;
+function placeNameFor(lat, lng, cb) {
+  const key = lat.toFixed(3) + ',' + lng.toFixed(3);
+  if (geoCache[key]) { cb(geoCache[key]); return; }
+  if (geoInFlight) return;
+  geoInFlight = true;
+  fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1&accept-language=en')
+    .then(r => r.json())
+    .then(j => {
+      geoInFlight = false;
+      const a = (j && j.address) || {};
+      const area = a.suburb || a.neighbourhood || a.quarter || a.road || a.village || '';
+      const city = a.city || a.town || a.village || a.county || a.state || '';
+      let name = [area, city].filter((v, i, arr) => v && arr.indexOf(v) === i).join(', ');
+      if (!name && j && j.display_name) name = j.display_name.split(',').slice(0, 2).join(',').trim();
+      if (name) { geoCache[key] = name; cb(name); }
+    })
+    .catch(() => { geoInFlight = false; });
+}
+function setPlaceName(t) { const el = $('placeName'); if (el) el.textContent = t; }
+
 /* Every new GPS point flows through here — live or demo */
 function handlePoint(lat, lng, speedMs, accuracyM) {
   const point = [lat, lng];
@@ -118,11 +146,15 @@ function handlePoint(lat, lng, speedMs, accuracyM) {
   $('lat').textContent = lat.toFixed(6);
   $('lng').textContent = lng.toFixed(6);
   $('accuracy').textContent = accuracyM ? Math.round(accuracyM) : '—';
+  placeNameFor(lat, lng, name => {
+    setPlaceName(name);
+    if (marker) marker.bindPopup('📍 ' + name);
+  });
 
   const kmhNow = parseFloat($('speed').textContent) || 0;
   checkTools(point, kmhNow);
   guardCheck(point);
-  livePush(point, kmh);
+  livePush(point, kmhNow);
 }
 
 function setButtons(tracking) {
@@ -185,6 +217,7 @@ function resetTripStats() {
   if (trail) trail.setLatLngs([]);
   $('speed').textContent = '0'; $('distance').textContent = '0.00';
   $('lat').textContent = '—'; $('lng').textContent = '—'; $('accuracy').textContent = '—';
+  setPlaceName('—');
   $('tripTime').textContent = '00:00';
 }
 
@@ -222,6 +255,7 @@ function clearRoute() {
   totalKm = 0; lastPoint = null; lastPointTime = null;
   $('speed').textContent = '0'; $('distance').textContent = '0.00';
   $('lat').textContent = '—'; $('lng').textContent = '—'; $('accuracy').textContent = '—';
+  setPlaceName('—');
   $('tripTime').textContent = '00:00';
   setStatus('Not tracking', '');
   map.setView(WORLD_VIEW, 2);
@@ -417,6 +451,10 @@ window.__onLiveLogin = function () {
       if (!liveMarker) liveMarker = L.marker([v.lat, v.lng], { icon: L.divIcon({ className: '', html: '<div class="car-icon">🔵</div>', iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(map);
       else liveMarker.setLatLng([v.lat, v.lng]);
       liveSetInfo('Linked phone is LIVE · updated ' + ageS + 's ago · speed ' + (v.kmh || 0) + ' km/h' + (v.src === 'app' ? ' · from the app' : ''));
+      placeNameFor(v.lat, v.lng, name => {
+        if (liveMarker) liveMarker.bindPopup('📍 ' + name);
+        liveSetInfo('Linked phone is LIVE · 📍 ' + name + ' · updated ' + ageS + 's ago · speed ' + (v.kmh || 0) + ' km/h' + (v.src === 'app' ? ' · from the app' : ''));
+      });
     } else {
       liveSetInfo('Linked phone last seen ' + Math.round(ageS / 60) + ' min ago.');
     }
