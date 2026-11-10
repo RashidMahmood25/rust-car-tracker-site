@@ -169,3 +169,11 @@
   #guardPinRow{display:none;gap:8px;margin-top:10px;flex-wrap:wrap}
   #guardPinRow input{flex:1;min-width:130px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--ink);font-size:15px}
   @keyframes alarmflash{from{background:#B91C1C}to{background:#7F1D1D}}
+
+  /* ===== Projects section ===== */
+  .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:10px}
+  .proj-card{display:block;background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:16px 18px;text-decoration:none;transition:border-color .2s, transform .2s}
+  .proj-card:hover{border-color:var(--lime);transform:translateY(-2px)}
+  .proj-card h3{font-size:1rem;color:var(--strong);margin:8px 0 4px;word-break:break-word}
+  .proj-card p{color:var(--muted);font-size:.9rem;margin:0}
+  .proj-chip{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--chip-ink);background:var(--chip-bg);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
