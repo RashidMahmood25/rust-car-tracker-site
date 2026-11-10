@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker — Download Android App | Project with RustWheel</title>
+<meta name="description" content="Download the Expense Tracker Android app (APK). Track your daily expenses.">
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" href="../logo.svg" type="image/svg+xml">
+<style>
+  .dl-wrap{max-width:640px;margin:0 auto;text-align:center;padding:56px 20px}
+  .app-ini{width:110px;height:110px;margin:0 auto 20px;border-radius:28px;background:#0B1F3A;border:3px solid var(--lime);color:var(--lime);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800}
+  .dl-btn{display:inline-block;margin-top:26px;padding:16px 38px;font-size:1.15rem}
+  .dl-meta{color:var(--muted);margin-top:14px;font-size:.92rem}
+  .dl-note{color:var(--muted);margin-top:26px;font-size:.88rem;line-height:1.6}
+</style>
+</head>
+<body>
+<header class="hero">
+  <video id="vidNight" autoplay muted loop playsinline poster="https://images.pexels.com/videos/7628845/pexels-photo-7628845.jpeg">
+    <source src="https://videos.pexels.com/video-files/7628845/7628845-hd_1280_720_25fps.mp4" type="video/mp4">
+  </video>
+  <video id="vidDay" muted loop playsinline poster="https://images.pexels.com/videos/5531385/pexels-photo-5531385.jpeg" style="display:none">
+    <source src="https://videos.pexels.com/video-files/5531385/5531385-hd_1280_720_24fps.mp4" type="video/mp4">
+  </video>
+  <div class="shade"></div><div class="glow"></div>
+  <div class="wrap" style="position:relative;z-index:3;width:100%">
+    <nav>
+      <div class="brand"><span class="dot"><img src="logo.svg" alt="Rust Tracker logo" style="width:30px;height:30px;border-radius:8px"></span> RUST&nbsp;<em>TRACKER</em></div>
+      <div class="links">
+        <a href="#tracker">Live Tracker</a><a href="#features">Features</a><a href="#rustwheel">Rust Wheel</a><a href="#blog">Blog</a><a href="#projects">Projects</a><a href="#follow">Follow</a><a href="#contact">Contact</a><a href="#how">How it works</a>
+      </div>
+      <button id="themeToggle" title="Dark / Light mode" aria-label="Toggle dark or light mode">☀️</button>
+    </nav>
+  </div>
+  <div class="wrap hero-mid" style="width:100%">
+    <span class="kicker"><i></i> Live GPS Tracking</span>
+    <h1 class="display">Your ride.<br><span class="grad">Always on your map.</span></h1>
+    <p class="sub">No extra GPS device, no wiring, no monthly fee. The phone in your car becomes the tracker — live location, speed and route on a worldwide map, right here in your browser.</p>
+    <div class="cta-row">
+      <a class="btn btn-lime" href="#tracker" id="ctaStart">📍 Start Live Tracking</a>
+      <a class="btn btn-glass" href="#tracker" id="ctaDemo">▶ See a Demo Drive</a>
+    </div>
+    <div class="chips">
+      <span class="chip">🌍 <b>Worldwide</b> — every city, every country</span>
+      <span class="chip">🛰️ <b>Real-time</b> GPS from your phone</span>
+      <span class="chip">💸 <b>Free</b> — no device to buy</span>
+    </div>
+  </div>
+</header>
+<div class="dl-wrap">
+  <div class="app-ini">EX</div>
+  <span class="tag">Android App</span>
+  <h1 style="font-size:1.9rem;margin-top:10px">Expense Tracker</h1>
+  <p style="color:var(--muted)">Track your daily expenses.</p>
+  <a class="btn btn-lime dl-btn" href="../apks/expenses.apk" download>📱 Download APK</a>
+  <p class="dl-meta">Size: 21 KB · Android 8.0 or above · Free</p>
+  <p class="dl-note">Tap the button, then open the downloaded file to install. Your phone may ask you to allow installs from your browser — that is normal for apps downloaded from a website.</p>
+  <p style="margin-top:22px"><a href="../projects.html">← All projects</a></p>
+</div>
+<footer>
+  <div class="wrap">
+    <span><img src="logo.svg" alt="" style="width:18px;height:18px;border-radius:5px;vertical-align:-3px"> <strong style="color:var(--strong)">Rust Tracker</strong> — a Rust Wheel project</span>
+    <span>Satellite map © Esri · Hero videos: ArtHouse Studio (night) & K (day) via Pexels</span>
+  </div>
+</footer>
+<script src="../theme.js"></script>
+</body>
+</html>
